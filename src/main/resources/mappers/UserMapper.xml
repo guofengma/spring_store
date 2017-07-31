@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxg.springboot.mapper.UserMapper">
+
+	<insert id="save" parameterType="com.lxg.springboot.model.User">
+		insert into user(openid,nickname,sex,age,phoneno,address)
+		values (#{openid},#{nickname},#{sex},#{age},#{phoneno},#{address})
+	</insert>
+	
+	<update id="update" parameterType="com.lxg.springboot.model.User">
+		 update user 
+		 set openid=#{openid},nickname=#{nickname},
+		 sex=#{sex},age=#{age},phoneno=#{phoneno},address=#{address} 
+		 where openid=#{openid}
+	</update>
+	
+	<select id="query" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
+		select * from user 
+		where openid=#{openid}
+	</select>
+	
+	<select id="count" parameterType="com.lxg.springboot.model.User" resultType="int">
+		select count(*) from user 
+		where phoneno=#{phoneno} and password=#{password} 
+	</select>	
+	
+	<select id="querybyno" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
+		select * from user 
+		where phoneno=#{phoneno}
+	</select>
+	
+	<insert id="saveboss" parameterType="com.lxg.springboot.model.User">
+		insert into userboss(openid,nickname,sex,age,phoneno,address,storeid)
+		values (#{openid},#{nickname},#{sex},#{age},#{phoneno},#{address},#{storeid})
+	</insert>
+	
+	<update id="updateboss" parameterType="com.lxg.springboot.model.User">
+		 update userboss 
+		 set openid=#{openid},nickname=#{nickname},
+		 sex=#{sex},age=#{age},phoneno=#{phoneno},address=#{address} 
+		 where openid=#{openid} and storeid=#{storeid}
+	</update>
+	
+	<select id="queryboss" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
+		select * from userboss 
+		where openid=#{openid} and storeid=#{storeid}
+	</select>
+		
+	<select id="querybynoboss" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
+		select * from userboss 
+		where phoneno=#{phoneno}
+	</select>
+	
+		<select id="countboss" parameterType="com.lxg.springboot.model.User" resultType="int">
+		select count(*) from userboss 
+		where phoneno=#{phoneno} and password=#{password} 
+	</select>
+
+</mapper>  

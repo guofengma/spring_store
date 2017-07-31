@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxg.springboot.mapper.ShopMapper">
+
+	
+	<select id="query" resultType="com.lxg.springboot.model.Shop">
+		select * from store 
+	</select>
+	
+	<select id="querybyid" resultType="com.lxg.springboot.model.Shop">
+		select * from store where storeid=#{storeid}
+	</select>
+	
+	<select id="totle" parameterType="com.lxg.springboot.model.Order" resultType="com.lxg.springboot.model.Order">
+		select * from orders where storeid=#{storeid}
+		<if test="startDate != null and startDate != ''">
+    	and time &gt;= #{startDate}
+    	</if> 
+    	<if test="endDate != null and endDate != ''">
+    	and time &lt;= #{endDate}
+    	</if>
+	</select>
+	
+</mapper>  
