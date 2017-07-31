@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxg.springboot.mapper.GoodMapper">
+
+	
+	<select id="queryall" resultType="com.lxg.springboot.model.Good" >
+		select * from goodonsale where storeid=#{storeid}
+	</select>
+	
+	<select id="query" parameterType="com.lxg.springboot.model.Good"  resultType="com.lxg.springboot.model.Good">
+		select * from goodonsale where code=#{code} and storeid=#{storeid};
+	</select>
+	
+	<select id="querybyCode" parameterType="com.lxg.springboot.model.Good"  resultType="com.lxg.springboot.model.Good">
+		select * from goodonsale where code=#{code} and storeid=#{storeid};
+	</select>
+	
+	<select id="update" parameterType="com.lxg.springboot.model.Good">
+		update goodonsale set amount=#{amount},price=#{price} where code=#{code} and storeid=#{storeid};
+	</select>
+	
+	<select id="insert" parameterType="com.lxg.springboot.model.Good">
+		insert into goodonsale(name,specifi,code,amount,price,storeid)
+		values (#{name},#{specifi},#{code},#{amount},#{price},#{storeid})
+	</select>
+	
+</mapper>  

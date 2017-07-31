@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxg.springboot.mapper.ScoreMapper">
+
+	<insert id="save" parameterType="com.lxg.springboot.model.Score">
+		insert into score(openid,type,score)
+		values (#{openid},#{type},#{score})
+	</insert>
+	
+	<update id="update" parameterType="com.lxg.springboot.model.Score">
+		 update score 
+		 set score=#{score} + score
+		 where openid=#{openid} and type=#{type}
+	</update>
+	
+	<select id="querybytype" parameterType="com.lxg.springboot.model.Score" resultType="int">
+		select IFNULL(sum(score),0) from score 
+		where openid=#{openid} and type=#{type}
+	</select>	
+	
+	<select id="query" parameterType="com.lxg.springboot.model.Score" resultType="int">
+		select IFNULL(sum(score),0) from score 
+		where openid=#{openid}
+	</select>	
+
+	<select id="count" parameterType="com.lxg.springboot.model.Score" resultType="int">
+		select count(*) from score 
+		where openid=#{openid} and type=#{type} 
+	</select>
+
+</mapper>  
