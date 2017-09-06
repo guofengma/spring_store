@@ -236,7 +236,8 @@ public class WxPayController {
             	returngood.setAmount(returngood.getAmount()-temp.get(i).getAmount());
             	goodMapper.update(returngood);		
     	}
-    
+        	orderMapper.update(Order);     
+        	//企业付款
         	int fee = (int) (tempOrder.getFee()*100); 
         	System.out.println("企业支付结果：" + fee);
         	String feeS = Integer.toString(fee);
@@ -299,9 +300,9 @@ public class WxPayController {
     		withDrawMapper.update(OrderPay);  	
         }
         else{
-        	Order.setState(0);	
-        }               
-		orderMapper.update(Order);        
+        	Order.setState(0);
+        	orderMapper.update(Order);     
+        }                  
         }
     }
     
