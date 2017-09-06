@@ -6,6 +6,7 @@ import com.lxg.springboot.mapper.OrderMapper;
 import com.lxg.springboot.mapper.RefundMapper;
 import com.lxg.springboot.mapper.WithDrawMapper;
 import com.lxg.springboot.mapper.ShopMapper;
+import com.lxg.springboot.mapper.UserMapper;
 import com.lxg.springboot.model.Cart;
 import com.lxg.springboot.model.Good;
 import com.lxg.springboot.model.Shop;
@@ -88,6 +89,8 @@ public class WxPayController {
     private GoodMapper goodMapper;
 	@Resource
     private ShopMapper shopMapper;
+	@Resource
+    private UserMapper userMapper;
 	
     @RequestMapping("wxpay/prepay")
     public String prepay(Order Order) throws Exception {	
@@ -121,6 +124,9 @@ public class WxPayController {
         		temp.setCode(cart.get(i).getCode());
         		temp.setOrderNo(orderNo);
         		temp.setStoreid(Order.getStoreid());
+        		temp.setSpecifi(returngood.getSpecifi());
+        		temp.setPrice(returngood.getPrice());
+        		temp.setName(returngood.getName());
         		OrderMapper.savegood(temp);	
         	}	 
         }	
@@ -213,7 +219,9 @@ public class WxPayController {
         
         Order Order = new Order();
         Order.setOrderNo(map.get("out_trade_no"));
-        if(orderMapper.querybyno(Order).getState()!=1){
+        Order tempOrder = new Order();
+        tempOrder = orderMapper.querybyno(Order);
+        if(tempOrder.getState()!=1){        	
         if (map.get("result_code").equals("SUCCESS")) {      	
         	Order.setState(1);
         	List<OrderGood> temp;
@@ -227,7 +235,68 @@ public class WxPayController {
             	System.out.println("减库存"+ returngood.getAmount()+temp.get(i).getAmount());
             	returngood.setAmount(returngood.getAmount()-temp.get(i).getAmount());
             	goodMapper.update(returngood);		
-    	}	
+    	}
+    
+        	int fee = (int) (tempOrder.getFee()*100); 
+        	System.out.println("企业支付结果：" + fee);
+        	String feeS = Integer.toString(fee);
+        	String paternerKey="79m1jyaofjonvahln1wnoq606rvbk2gi";
+    		Map<String, String> parm = new HashMap<String, String>();
+    		String orderNo = RandomStringGenerator.getRandomStringByLength(32);
+    		Order OrderPay = new Order();
+    		OrderPay.setOrderNo(orderNo);
+    		OrderPay.setFee(tempOrder.getFee());
+    		String storeid=tempOrder.getMch_id();
+    		User tempuser = new User();
+    		tempuser.setStoreid(storeid);
+    		User Boss=userMapper.queryboss(tempuser);
+    		try{		
+    		parm.put("mch_appid", appid); //公众账号appid
+    		parm.put("mchid", "1472139902"); //商户号
+    		parm.put("nonce_str", RandomStringGenerator.getRandomStringByLength(32)); //随机字符串
+    		parm.put("partner_trade_no",orderNo); //商户订单号
+    		parm.put("openid", Boss.getOpenid()); //用户openid	
+    		parm.put("check_name", "FORCE_CHECK"); //校验用户姓名选项 OPTION_CHECK
+    		parm.put("re_user_name", Boss.getNickname()); //check_name设置为FORCE_CHECK或OPTION_CHECK，则必填
+    		parm.put("amount", feeS); //转账金额
+    		parm.put("desc", "快点支付"); //企业付款描述信息		
+    		parm.put("spbill_create_ip", InetAddress.getLocalHost().getHostAddress());
+    		parm.put("sign", PayUtil.getSign(parm, paternerKey));
+    		OrderPay.setMch_id("1472139902");
+    		Date date=new Date(); 
+    		DateFormat format=new SimpleDateFormat("yyyyMMddHHmmss"); 
+    		String time=format.format(date);
+    		OrderPay.setOpenid(Boss.getOpenid());
+    		OrderPay.setTime(time);
+    		OrderPay.setState(2);
+    		withDrawMapper.save(OrderPay);
+    		
+    		} catch (UnsupportedEncodingException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		} catch (UnknownHostException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}		
+    		HttpResult result2 = HttpUtils.posts("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", XmlUtil.xmlFormat(parm, false));
+    			
+
+    		XStream xStream = new XStream();
+    		xStream.alias("xml", PayReturnInfo.class); 
+
+    		PayReturnInfo returnInfo = (PayReturnInfo)xStream.fromXML(result2.getBody());
+    		JSONObject json = new JSONObject();
+    		json.put("return_code", returnInfo.getReturn_code());
+    		json.put("return_msg", returnInfo.getReturn_msg());
+    		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
+    		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+    		if (returnInfo.getResult_code().equals("SUCCESS")) {
+    			OrderPay.setState(1);		
+            }
+            else{
+            	OrderPay.setState(0);	
+            }               
+    		withDrawMapper.update(OrderPay);  	
         }
         else{
         	Order.setState(0);	
@@ -253,17 +322,6 @@ public class WxPayController {
     	for(int j =0;j<allOrder.size();j++){
     		List<OrderGood> temp;
         	temp=orderMapper.queryGood(allOrder.get(j));  
-        	for(int i=0 ;i<temp.size();i++){
-        		Good good = new Good();
-            	Good returngood = new Good();
-            	good.setCode(temp.get(i).getCode());
-            	good.setStoreid(temp.get(i).getStoreid());
-            	returngood=goodMapper.query(good);
-            	temp.get(i).setPrice(returngood.getPrice());
-            	temp.get(i).setName(returngood.getName());
-            	temp.get(i).setSpecifi(returngood.getSpecifi()); 	
-            	temp.get(i).setStoreid(order.getStoreid());
-    	}
         	allOrder.get(j).setTemp(temp);
     	}
     	return allOrder;  	       
@@ -275,17 +333,6 @@ public class WxPayController {
     		returnOrder=orderMapper.querybyno(order);
     		List<OrderGood> temp;
         	temp=orderMapper.queryGood(returnOrder);  
-        	for(int i=0 ;i<temp.size();i++){
-        		Good good = new Good();
-            	Good returngood = new Good();
-            	good.setCode(temp.get(i).getCode());
-            	good.setStoreid(temp.get(i).getStoreid());
-            	returngood=goodMapper.query(good);
-            	temp.get(i).setPrice(returngood.getPrice());
-            	temp.get(i).setName(returngood.getName());
-            	temp.get(i).setSpecifi(returngood.getSpecifi()); 	
-            	temp.get(i).setStoreid(returnOrder.getStoreid());
-        	}
         	returnOrder.setStore(shopMapper.querybyid(returnOrder.getStoreid()));
         	returnOrder.setTemp(temp);
     	return returnOrder;  	       
@@ -298,17 +345,6 @@ public class WxPayController {
     	for(int j =0;j<allOrder.size();j++){
     		List<OrderGood> temp;
         	temp=orderMapper.queryGood(allOrder.get(j));  
-        	for(int i=0 ;i<temp.size();i++){
-        		Good good = new Good();
-            	Good returngood = new Good();
-            	good.setCode(temp.get(i).getCode());
-            	good.setStoreid(temp.get(i).getStoreid());
-            	returngood=goodMapper.query(good);
-            	temp.get(i).setPrice(returngood.getPrice());
-            	temp.get(i).setName(returngood.getName());
-            	temp.get(i).setSpecifi(returngood.getSpecifi()); 	
-            	temp.get(i).setStoreid(order.getStoreid());
-    	}
         	allOrder.get(j).setTemp(temp);
     	}
     	return allOrder;  	       
@@ -323,17 +359,6 @@ public class WxPayController {
     	for(int j =0;j<allOrder.size();j++){
     		List<OrderGood> temp;
         	temp=orderMapper.queryGood(allOrder.get(j));  
-        	for(int i=0 ;i<temp.size();i++){
-        		Good good = new Good();
-            	Good returngood = new Good();
-            	good.setCode(temp.get(i).getCode());
-            	good.setStoreid(temp.get(i).getStoreid());
-            	returngood=goodMapper.query(good);
-            	temp.get(i).setPrice(returngood.getPrice());
-            	temp.get(i).setName(returngood.getName());
-            	temp.get(i).setSpecifi(returngood.getSpecifi()); 	
-            	temp.get(i).setStoreid(order.getStoreid());
-    	}
         	allOrder.get(j).setTemp(temp);
     	}
     	
@@ -359,17 +384,6 @@ public class WxPayController {
     	for(int j =0;j<allOrder.size();j++){
     		List<OrderGood> temp;
         	temp=orderMapper.queryGood(allOrder.get(j));  
-        	for(int i=0 ;i<temp.size();i++){
-        		Good good = new Good();
-            	Good returngood = new Good();
-            	good.setCode(temp.get(i).getCode());
-            	good.setStoreid(temp.get(i).getStoreid());
-            	returngood=goodMapper.query(good);
-            	temp.get(i).setPrice(returngood.getPrice());
-            	temp.get(i).setName(returngood.getName());
-            	temp.get(i).setSpecifi(returngood.getSpecifi()); 	
-            	temp.get(i).setStoreid(order.getStoreid());
-    	}
         	allOrder.get(j).setTemp(temp);
     	}
     	orderpage.setOrder(allOrder);
@@ -389,16 +403,6 @@ public class WxPayController {
     public List<OrderGood> queryGood(Order order) throws IOException {    	
     	List<OrderGood> temp;
     	temp=orderMapper.queryGood(order);  
-    	for(int i=0 ;i<temp.size();i++){
-    		Good good = new Good();
-        	Good returngood = new Good();
-        	good.setCode(temp.get(i).getCode());
-        	returngood=goodMapper.query(good);
-        	temp.get(i).setPrice(returngood.getPrice());
-        	temp.get(i).setName(returngood.getName());
-        	temp.get(i).setSpecifi(returngood.getSpecifi()); 		
-        	temp.get(i).setStoreid(order.getStoreid());
-    	}
 		return temp;	
     }
     
