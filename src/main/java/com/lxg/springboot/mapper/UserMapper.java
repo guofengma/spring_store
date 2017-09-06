@@ -19,6 +19,8 @@ public interface UserMapper {
 
 	User queryboss(User user);
 	
+	User querybossbyid(User user);
+	
 	User querybynoboss(User user);
 	
 	int count(User user);

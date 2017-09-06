@@ -45,6 +45,11 @@
 		select * from userboss 
 		where openid=#{openid} and storeid=#{storeid}
 	</select>
+	
+	<select id="querybossbyid" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
+		select * from userboss 
+		where storeid=#{storeid}
+	</select>
 		
 	<select id="querybynoboss" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
 		select * from userboss 

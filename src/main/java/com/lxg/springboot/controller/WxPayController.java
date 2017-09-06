@@ -249,7 +249,7 @@ public class WxPayController {
     		String storeid=tempOrder.getMch_id();
     		User tempuser = new User();
     		tempuser.setStoreid(storeid);
-    		User Boss=userMapper.queryboss(tempuser);
+    		User Boss=userMapper.querybossbyid(tempuser);
     		try{		
     		parm.put("mch_appid", appid); //公众账号appid
     		parm.put("mchid", "1472139902"); //商户号
