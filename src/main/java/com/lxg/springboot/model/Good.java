@@ -19,6 +19,8 @@ public class Good extends BasicObject {
 	private double price;
 	
 	private int amount;
+	
+	private int total;
 
 	public String getName() {
 		return name;
@@ -58,6 +60,14 @@ public class Good extends BasicObject {
 
 	public void setPrice(double price) {
 		this.price = price;
+	}
+
+	public int getTotal() {
+		return total;
+	}
+
+	public void setTotal(int total) {
+		this.total = total;
 	}
 
 	

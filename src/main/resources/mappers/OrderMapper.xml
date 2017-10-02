@@ -35,8 +35,8 @@
 	</select>
 	
 	<insert id="savegood" parameterType="com.lxg.springboot.model.OrderGood">
-		insert into ordergood(orderNo,code,amount,storeid)
-		values (#{orderNo},#{code},#{amount},#{storeid})
+		insert into ordergood(orderNo,code,amount,storeid,price,name,specifi)
+		values (#{orderNo},#{code},#{amount},#{storeid},#{price},#{name},#{specifi})
 	</insert>
 	
 	<select id="queryGood" parameterType="com.lxg.springboot.model.OrderGood" resultType="com.lxg.springboot.model.OrderGood">

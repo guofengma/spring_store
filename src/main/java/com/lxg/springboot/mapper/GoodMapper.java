@@ -3,6 +3,7 @@ package com.lxg.springboot.mapper;
 import java.util.List;
 
 import com.lxg.springboot.model.Good;
+import com.lxg.springboot.model.OrderGood;
 
 public interface GoodMapper {
 		
@@ -15,4 +16,8 @@ public interface GoodMapper {
 	void update(Good good);
 	
 	void insert(Good good);
+	
+	List<OrderGood> amountrank(OrderGood ordergood);
+	
+	List<OrderGood> moneyrank(OrderGood ordergood);
 }

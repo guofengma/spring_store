@@ -16,12 +16,19 @@
 	</select>
 	
 	<select id="update" parameterType="com.lxg.springboot.model.Good">
-		update goodonsale set amount=#{amount},price=#{price} where code=#{code} and storeid=#{storeid};
+		update goodonsale set amount=#{amount},price=#{price},name=#{name},specifi=#{specifi},total=#{total} where code=#{code} and storeid=#{storeid};
 	</select>
 	
 	<select id="insert" parameterType="com.lxg.springboot.model.Good">
-		insert into goodonsale(name,specifi,code,amount,price,storeid)
-		values (#{name},#{specifi},#{code},#{amount},#{price},#{storeid})
+		insert into goodonsale(name,specifi,code,amount,price,storeid,total)
+		values (#{name},#{specifi},#{code},#{amount},#{price},#{storeid},#{total})
 	</select>
 	
+	<select id="amountrank" parameterType="com.lxg.springboot.model.OrderGood" resultType="com.lxg.springboot.model.OrderGood">
+		select code,name,sum(amount) amount from (SELECT ordergood.code,ordergood.name,ordergood.amount,ordergood.price,ordergood.storeid,ordergood.orderNo,orders.orderNo new,orders.state from ordergood LEFT JOIN orders on(ordergood.orderNo=orders.orderNo)) as temp where storeid=#{storeid} and state='1' group by name ORDER BY amount DESC
+	</select>
+	
+	<select id="moneyrank" parameterType="com.lxg.springboot.model.OrderGood" resultType="com.lxg.springboot.model.OrderGood">
+		select code,name,sum(amount*price) amount from (SELECT ordergood.code,ordergood.name,ordergood.amount,ordergood.price,ordergood.storeid,ordergood.orderNo,orders.orderNo new,orders.state from ordergood LEFT JOIN orders on(ordergood.orderNo=orders.orderNo)) as temp where storeid=#{storeid} and state='1' group by name ORDER BY amount DESC
+	</select>
 </mapper>  

@@ -4,9 +4,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
+import com.lxg.springboot.mapper.CommentMapper;
 import com.lxg.springboot.mapper.GoodMapper;
 import com.lxg.springboot.mapper.OrderMapper;
 import com.lxg.springboot.mapper.ShopMapper;
+import com.lxg.springboot.model.Comment;
 import com.lxg.springboot.model.Good;
 import com.lxg.springboot.model.Order;
 import com.lxg.springboot.model.OrderGood;
@@ -36,6 +38,9 @@ public class ShopController{
     private OrderMapper orderMapper;
 	@Resource
     private GoodMapper goodMapper;
+	@Resource
+    private CommentMapper commentMapper;
+	
 	
     @RequestMapping("qrcode")
     public void qrcode(String data, HttpServletResponse response, Integer width, Integer height) throws Exception {
@@ -166,7 +171,8 @@ public class ShopController{
     
     
     @RequestMapping("CVS/goodcontrol")
-    public String goodcontrol(Good good){	
+    public String goodcontrol(Good good){
+    	good.setTotal(good.getAmount());
     	Good temp = goodMapper.querybyCode(good);
     	if (temp==null){
     		goodMapper.insert(good);
@@ -195,6 +201,29 @@ public class ShopController{
 		json.put("totle", fee);
 		
 		return json.toJSONString();
+    }  
+    
+    @RequestMapping("CVS/comment")
+    public String comment(Comment comment){	
+    	commentMapper.save(comment);
+    	
+		return "评论成功";
+    }
+    
+    @RequestMapping("CVS/amountrank")
+    public List<OrderGood> amountrank(OrderGood good){	
+    	List<OrderGood> returngood;
+    	returngood=goodMapper.amountrank(good);
+    		
+		return returngood;
+    }  
+    
+    @RequestMapping("CVS/moneyrank")
+    public List<OrderGood> moneyrank(OrderGood good){	
+    	List<OrderGood> returngood;
+    	returngood=goodMapper.moneyrank(good);
+    		
+		return returngood;
     }  
     
     /** 
