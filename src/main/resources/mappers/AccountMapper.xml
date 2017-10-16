@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lxg.springboot.mapper.AccountMapper">
-	
+		
 	<select id="query" parameterType="com.lxg.springboot.model.Account"  resultType="com.lxg.springboot.model.Account">
-		select * from account where storeid=#{storeid};
+		select DATE_FORMAT(time,"%Y%m%d") as time,name,amount,storeid from account where storeid=#{storeid} and time &gt;=#{time1} and time &lt;=#{time2}
 	</select>
 		
 	<select id="save" parameterType="com.lxg.springboot.model.Account">

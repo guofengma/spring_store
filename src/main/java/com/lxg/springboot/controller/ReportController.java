@@ -1,9 +1,9 @@
 package com.lxg.springboot.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.lxg.springboot.mapper.AccountMapper;
+import com.lxg.springboot.mapper.ReportMapper;
 import com.lxg.springboot.model.Result;
-import com.lxg.springboot.model.Account;
+import com.lxg.springboot.model.Report;
 import com.lxg.springboot.model.Good;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,25 +18,23 @@ import javax.annotation.Resource;
  * on 2017/4/25.
  */
 @RestController
-@RequestMapping("CVS/account/")
-public class AccountController extends BaseController {
+@RequestMapping("CVS/report/")
+public class ReportController extends BaseController {
 	
 	@Resource
-    private AccountMapper accountMapper;
+    private ReportMapper reportMapper;
 
     @RequestMapping("save")
-    public Result save(Account account) {
+    public Result save(Report report) {
     
-    	accountMapper.save(account);
+    	reportMapper.save(report);
     	return new Result();
     }    
     
     
     @RequestMapping("query")
-    public List<Account> query(Account account) {
-    	account.setTime1(account.getTime() + "01");
-    	account.setTime2(account.getTime() + "31");
-    	return accountMapper.query(account);  	
+    public Report query(Report report) {	
+    	return reportMapper.query(report);  	
     } 
     
 }

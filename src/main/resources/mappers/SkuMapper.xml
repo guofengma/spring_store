@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxg.springboot.mapper.SkuMapper">
+
+	
+	<select id="queryall" resultType="com.lxg.springboot.model.Sku" >
+		select * from sku where storeid=#{storeid}
+	</select>
+	
+	<select id="queryalldown" resultType="com.lxg.springboot.model.Sku" >
+		select * from skudown where storeid=#{storeid}
+	</select>
+	
+	<select id="query" parameterType="com.lxg.springboot.model.Sku"  resultType="com.lxg.springboot.model.Sku">
+		select * from sku where code=#{code} and storeid=#{storeid};
+	</select>
+	
+	<select id="querybyCode" parameterType="com.lxg.springboot.model.Sku"  resultType="com.lxg.springboot.model.Sku">
+		select * from sku where code=#{code} and storeid=#{storeid};
+	</select>
+	
+	<select id="update" parameterType="com.lxg.springboot.model.Sku">
+		update sku set tag=#{tag} where code=#{code} and storeid=#{storeid};
+	</select>
+	
+	<select id="updatedown" parameterType="com.lxg.springboot.model.Sku">
+		update skudown set tag=#{tag} where code=#{code} and storeid=#{storeid};
+	</select>
+	
+</mapper>  
