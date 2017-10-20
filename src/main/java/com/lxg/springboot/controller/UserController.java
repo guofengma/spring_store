@@ -8,6 +8,8 @@ import com.lxg.springboot.model.User;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 /**
@@ -68,11 +70,12 @@ public class UserController extends BaseController {
     @RequestMapping("login")
     public String login(User user) {    	
     	if(userMapper.countboss(user)==1){
-    		User userf = userMapper.querybynoboss(user);
+    		List<User> userf ;
+    		userf = userMapper.querybynoboss(user);
     		JSONObject json = new JSONObject();
     		json.put("returncode", "00");
     		json.put("returnmsg","登陆成功");
-    		json.put("storeid",userf.getStoreid());
+    		json.put("storeid",userf);
     		return json.toJSONString();
     	}
     	else{

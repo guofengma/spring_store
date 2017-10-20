@@ -7,6 +7,29 @@
 		select * from sku where storeid=#{storeid}
 	</select>
 	
+	<select id="delete" parameterType="com.lxg.springboot.model.Sku" >
+		delete from sku where storeid=#{storeid}
+	</select>
+	
+	<select id="deletedown" parameterType="com.lxg.springboot.model.Sku" >
+		delete from skudown where storeid=#{storeid}
+	</select>
+	
+	<select id="inserthistory" parameterType="com.lxg.springboot.model.Sku">
+		insert into skuhistory(name,specifi,code,amount,price,storeid,total,skuamount,tag)
+		values (#{name},#{specifi},#{code},#{amount},#{price},#{storeid},#{total},#{skuamount},#{tag})
+	</select>
+	
+	<select id="insert" parameterType="com.lxg.springboot.model.Sku">
+		insert into sku(name,specifi,code,amount,price,storeid,total,skuamount,tag)
+		values (#{name},#{specifi},#{code},#{amount},#{price},#{storeid},#{total},#{skuamount},#{tag})
+	</select>
+	
+	<select id="insertdown" parameterType="com.lxg.springboot.model.Sku">
+		insert into skudown(name,specifi,code,amount,price,storeid,total,skuamount,tag)
+		values (#{name},#{specifi},#{code},#{amount},#{price},#{storeid},#{total},#{skuamount},#{tag})
+	</select>
+	
 	<select id="queryalldown" resultType="com.lxg.springboot.model.Sku" >
 		select * from skudown where storeid=#{storeid}
 	</select>
@@ -19,12 +42,32 @@
 		select * from sku where code=#{code} and storeid=#{storeid};
 	</select>
 	
-	<select id="update" parameterType="com.lxg.springboot.model.Sku">
+	<select id="update" parameterType="com.lxg.springboot.model.Sku"   resultType="com.lxg.springboot.model.Sku">
 		update sku set tag=#{tag} where code=#{code} and storeid=#{storeid};
 	</select>
 	
-	<select id="updatedown" parameterType="com.lxg.springboot.model.Sku">
+	<select id="updatedown" parameterType="com.lxg.springboot.model.Sku"   resultType="com.lxg.springboot.model.Sku">
 		update skudown set tag=#{tag} where code=#{code} and storeid=#{storeid};
 	</select>
 	
+	<select id="comment" parameterType="com.lxg.springboot.model.Sku" resultType="com.lxg.springboot.model.Intea">
+		select num from comnum where code=#{code} and storeid=#{storeid};
+	</select>
+	
+	<select id="count" parameterType="com.lxg.springboot.model.Sku" resultType="com.lxg.springboot.model.Intea">
+		select sum(amount) as num from cart where code=#{code} and storeid=#{storeid};
+	</select>
+	
+	
+	<select id="queryorder" parameterType="com.lxg.springboot.model.Order" resultType="com.lxg.springboot.model.OrderAll">
+		SELECT orders.time,orders.orderNo,ordergood.`code`,ordergood.amount,ordergood.price,orders.state from ordergood JOIN orders where orders.orderNo = ordergood.orderNo and state='1' and orders.storeid=#{storeid}
+		<if test="startDate != null and startDate != ''">
+    	and orders.time &gt;= #{startDate}
+    	</if> 
+    	<if test="endDate != null and endDate != ''">
+    	and orders.time &lt;= #{endDate}
+    	</if>
+	</select>
+	
+		
 </mapper>  

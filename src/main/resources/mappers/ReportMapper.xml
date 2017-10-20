@@ -3,12 +3,12 @@
 <mapper namespace="com.lxg.springboot.mapper.ReportMapper">
 	
 	<select id="query" parameterType="com.lxg.springboot.model.Report"  resultType="com.lxg.springboot.model.Report">
-		select * from report where storeid=#{storeid} and id=#{id};
+		select * from report where id=#{id};
 	</select>
 		
 	<select id="save" parameterType="com.lxg.springboot.model.Report">
-		insert into report(id,report,storeid)
-		values (#{id},#{report},#{storeid})
+		insert into report(id,report)
+		values (#{id},#{report})
 	</select>
 	
 </mapper>  

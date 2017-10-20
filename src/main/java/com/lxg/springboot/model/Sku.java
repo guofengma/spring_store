@@ -26,6 +26,8 @@ public class Sku extends BasicObject {
 	
 	private int tag;
 
+	private int num;
+	
 	public String getName() {
 		return name;
 	}
@@ -88,6 +90,14 @@ public class Sku extends BasicObject {
 
 	public void setTag(int tag) {
 		this.tag = tag;
+	}
+
+	public int getNum() {
+		return num;
+	}
+
+	public void setNum(Integer num) {
+		this.num = num;
 	}
 
 	

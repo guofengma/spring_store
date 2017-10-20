@@ -1,5 +1,7 @@
 package com.lxg.springboot.mapper;
 
+import java.util.List;
+
 import com.lxg.springboot.model.Score;
 import com.lxg.springboot.model.User;
 
@@ -21,7 +23,7 @@ public interface UserMapper {
 	
 	User querybossbyid(User user);
 	
-	User querybynoboss(User user);
+	List<User> querybynoboss(User user);
 	
 	int count(User user);
 	

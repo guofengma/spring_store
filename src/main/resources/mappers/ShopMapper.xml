@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lxg.springboot.mapper.ShopMapper">
-
+	<select id="insert" parameterType="com.lxg.springboot.model.Shop">
+		insert into store(StoreId,address,StoreName,lng,lat)
+		values (#{StoreId},#{address},#{StoreName},#{lng},#{lat})
+	</select>
 	
 	<select id="query" resultType="com.lxg.springboot.model.Shop">
 		select * from store 
@@ -12,6 +15,26 @@
 	</select>
 	
 	<select id="totle" parameterType="com.lxg.springboot.model.Order" resultType="com.lxg.springboot.model.Order">
+		select * from orders where storeid=#{storeid}
+		<if test="startDate != null and startDate != ''">
+    	and time &gt;= #{startDate}
+    	</if> 
+    	<if test="endDate != null and endDate != ''">
+    	and time &lt;= #{endDate}
+    	</if>
+	</select>
+	
+	<select id="usermoney" parameterType="com.lxg.springboot.model.UserBoss" resultType="com.lxg.springboot.model.OrderAll">
+		select ordertime.time,ordertime.orderNo,ordertime.amount,ordertime.price from (SELECT orders.time,orders.orderNo,ordergood.`code`,ordergood.amount,ordergood.price,orders.storeid,orders.state from ordergood JOIN orders where orders.orderNo = ordergood.orderNo and state='1')as ordertime JOIN userboss WHERE ordertime.storeid=userboss.storeid and phoneno=#{phoneno}
+		<if test="startDate != null and startDate != ''">
+    	and time &gt;= #{startDate}
+    	</if> 
+    	<if test="endDate != null and endDate != ''">
+    	and time &lt;= #{endDate}
+    	</if>
+	</select>
+	
+	<select id="totleuser" parameterType="com.lxg.springboot.model.Order" resultType="com.lxg.springboot.model.Order">
 		select * from orders where storeid=#{storeid}
 		<if test="startDate != null and startDate != ''">
     	and time &gt;= #{startDate}
