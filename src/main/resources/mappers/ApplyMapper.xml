@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxg.springboot.mapper.ApplyMapper">
+
+	<insert id="save" parameterType="com.lxg.springboot.model.Apply">
+		insert into apply(id,field,deal,supply)
+		values (#{id},#{field},#{deal},#{supply})
+	</insert>
+	
+	<update id="update" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set field=#{field},deal=#{deal},supply=#{supply},fieldstate=#{fieldstate},dealstate=#{dealstate},supplystate=#{supplystate}
+		 where id=#{id}
+	</update>
+	
+	<select id="query" parameterType="com.lxg.springboot.model.Apply" resultType="com.lxg.springboot.model.Apply">
+		select * from apply
+		limit #{page},#{pagenum}
+	</select>	
+	
+	<select id="querybyad" parameterType="com.lxg.springboot.model.Apply" resultType="com.lxg.springboot.model.Apply">
+		SELECT apply.id,apply.deal,apply.dealstate,apply.field,apply.fieldstate,apply.supply,apply.supplystate from field JOIN apply where apply.field = field.openid and field.address like CONCAT('%',#{address},'%')   
+		limit #{page},#{pagenum}
+	</select>
+	
+	<select id="querymax" resultType="int">
+			select max(id) from apply
+	</select>
+</mapper>  

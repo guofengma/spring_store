@@ -152,10 +152,11 @@ public class ShopController{
     	List<Order> allOrder; 
     	Calendar date = Calendar.getInstance();
     	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
-    	date.add(Calendar.DATE, -7);
+    	date.add(Calendar.DATE, -8);
 		String time=format.format(date.getTime());
 		String timeS = time + "000000";
 		Calendar datenow = Calendar.getInstance();
+		datenow.add(Calendar.DATE, -1);
 		String timenow=format.format(datenow.getTime());
 		String timeE = timenow + "235959";
     	order.setStartDate(timeS);
@@ -190,6 +191,7 @@ public class ShopController{
     	Calendar date = Calendar.getInstance();
     	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
     	date.add(Calendar.MONTH, -1);
+    	date.add(Calendar.DATE, -1);
 		String time=format.format(date.getTime());
 		String timeS = time + "000000";
 		Calendar datenow = Calendar.getInstance();
@@ -272,25 +274,25 @@ public class ShopController{
     	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
     	Calendar d28 = Calendar.getInstance();
     	d28.setTime(new Date());
-    	d28.add(Calendar.DATE, - 28); 
+    	d28.add(Calendar.DATE, - 29); 
         Date date28 = d28.getTime();
         String time28=format.format(date28);  
 
     	Calendar d21 = Calendar.getInstance();
     	d21.setTime(new Date());
-    	d21.add(Calendar.DATE, - 21); 
+    	d21.add(Calendar.DATE, - 22); 
         Date date21 = d21.getTime();
         String time21=format.format(date21);
         
     	Calendar d14 = Calendar.getInstance();
     	d14.setTime(new Date());
-    	d14.add(Calendar.DATE, - 14); 
+    	d14.add(Calendar.DATE, - 15); 
         Date date14 = d14.getTime();
         String time14=format.format(date14);
          
     	Calendar d7 = Calendar.getInstance();
     	d7.setTime(new Date());
-    	d7.add(Calendar.DATE, - 7); 
+    	d7.add(Calendar.DATE, - 8); 
         Date date7 = d7.getTime();
         String time7=format.format(date7);
     	 

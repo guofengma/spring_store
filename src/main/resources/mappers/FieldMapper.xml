@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxg.springboot.mapper.FieldMapper">
+
+	<insert id="savefield" parameterType="com.lxg.springboot.model.Field">
+        insert into field(openid,comname,comnum,name,phone,address,fee,img1,img2,img3)
+        values (#{openid},#{comname},#{comnum},#{name},#{phone},#{address},#{fee},#{img1},#{img2},#{img3})
+    </insert>
+    
+    <update id="updatefield" parameterType="com.lxg.springboot.model.Field">
+         update field 
+         set comname=#{comname},comnum=#{comnum},name=#{name},phone=#{phone},address=#{address},fee=#{fee},img1=#{img1},img2=#{img2},img3=#{img3},id=#{id}
+         where openid=#{openid}
+    </update>
+    
+    <select id="queryfield" parameterType="com.lxg.springboot.model.Field" resultType="com.lxg.springboot.model.Field">
+        select * from field  where openid=#{openid}
+    </select>   
+
+    <insert id="savedeal" parameterType="com.lxg.springboot.model.Field">
+        insert into deal(openid,name,phone,address,img1,img2)
+        values (#{openid},#{name},#{phone},#{address},#{img1},#{img2})
+    </insert>
+    
+    <update id="updatedeal" parameterType="com.lxg.springboot.model.Field">
+         update deal 
+         set name=#{name},phone=#{phone},address=#{address},img1=#{img1},img2=#{img2},id=#{id}
+         where openid=#{openid}
+    </update>
+    
+    <select id="querydeal" parameterType="com.lxg.springboot.model.Field" resultType="com.lxg.springboot.model.Field">
+        select * from deal  where  openid=#{openid}
+    </select>   
+
+	<insert id="savesupply" parameterType="com.lxg.springboot.model.Field">
+		insert into supply(openid,name,phone,address,goodtype,img1,img2)
+		values (#{openid},#{name},#{phone},#{address},#{goodtype},#{img1},#{img2})
+	</insert>
+	
+	<update id="updatesupply" parameterType="com.lxg.springboot.model.Field">
+		 update supply 
+		 set name=#{name},phone=#{phone},address=#{address},goodtype=#{goodtype},img1=#{img1},img2=#{img2},id=#{id}
+		 where openid=#{openid} 
+	</update>
+	
+	<select id="querysupply" parameterType="com.lxg.springboot.model.Field" resultType="com.lxg.springboot.model.Field">
+		select * from supply  where  openid=#{openid}
+	</select>	
+	
+</mapper>  
