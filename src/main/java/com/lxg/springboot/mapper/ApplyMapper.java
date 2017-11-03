@@ -11,10 +11,22 @@ public interface ApplyMapper {
 	
 	void update(Apply apply);
 	
+	Apply queryone(Apply apply);
+	
 	List<Apply> query(Apply apply);
 	
 	List<Apply> querybyad(Apply apply);
 	
 	int querymax();
+	
+	int querypage(Apply apply);
+	
+	int querypagead(Apply apply);
+	
+	void updatefield(Apply apply);
+	
+	void updatedeal(Apply apply);
+	
+	void updatesupply(Apply apply);
 	
 }

@@ -18,4 +18,15 @@
 		where openid=#{openid}
 	</select>
 	
+	<insert id="save" parameterType="com.lxg.springboot.model.WithDrawDay">
+		insert into withdrawday(openid,fee,time,state,storeid)
+		values (#{openid},#{fee},#{time},#{state},#{storeid})
+	</insert>
+	
+	<update id="update" parameterType="com.lxg.springboot.model.WithDrawDay">
+		 update withdrawday 
+		 set state=#{state}
+		 where storeid=#{storeid} and time=#{time}
+	</update>
+	
 </mapper>  

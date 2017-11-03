@@ -6,12 +6,14 @@ import com.lxg.springboot.mapper.OrderMapper;
 import com.lxg.springboot.mapper.RefundMapper;
 import com.lxg.springboot.mapper.WithDrawMapper;
 import com.lxg.springboot.mapper.ShopMapper;
+import com.lxg.springboot.mapper.SkuMapper;
 import com.lxg.springboot.mapper.UserMapper;
 import com.lxg.springboot.model.Cart;
 import com.lxg.springboot.model.Good;
 import com.lxg.springboot.model.Shop;
 import com.lxg.springboot.model.HttpResult;
 import com.lxg.springboot.model.Order;
+import com.lxg.springboot.model.OrderAll;
 import com.lxg.springboot.model.OrderGood;
 import com.lxg.springboot.model.OrderInfo;
 import com.lxg.springboot.model.OrderReturnInfo;
@@ -21,6 +23,7 @@ import com.lxg.springboot.model.RefundReturnInfo;
 import com.lxg.springboot.model.SignInfo;
 import com.lxg.springboot.model.Token;
 import com.lxg.springboot.model.User;
+import com.lxg.springboot.model.WithDrawDay;
 import com.lxg.springboot.service.HttpAPIService;
 import com.lxg.springboot.util.CollectionUtil;
 import com.lxg.springboot.util.HttpUtils;
@@ -52,6 +55,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,6 +95,8 @@ public class WxPayController {
     private ShopMapper shopMapper;
 	@Resource
     private UserMapper userMapper;
+	@Resource
+    private SkuMapper skuMapper;
 	
     @RequestMapping("wxpay/prepay")
     public String prepay(Order Order) throws Exception {	
@@ -278,7 +284,8 @@ public class WxPayController {
     		} catch (UnknownHostException e) {
     			// TODO Auto-generated catch block
     			e.printStackTrace();
-    		}		
+    		}	
+    		if(userMapper.bosspay()== 0){
     		HttpResult result2 = HttpUtils.posts("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", XmlUtil.xmlFormat(parm, false));
     			
 
@@ -298,12 +305,85 @@ public class WxPayController {
             	OrderPay.setState(0);	
             }               
     		withDrawMapper.update(OrderPay);  	
+    		}
         }
         else{
         	Order.setState(0);
         	orderMapper.update(Order);     
         }                  
         }
+    }
+    
+    @RequestMapping("wxpay/bosspay")
+    public void bosspay() throws IOException {  
+    	if(userMapper.bosspay()==1){
+    	Calendar c = Calendar.getInstance();
+    	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
+    	c.setTime(new Date());
+        c.add(Calendar.DATE, - 1); 
+        Date d = c.getTime();
+        String timed=format.format(d);       
+    	List<OrderAll> allOrder; 
+    	Order order = new Order();
+		String timeS = timed + "000000";
+		String timeE = timed + "235959";
+		order.setStartDate(timeS);
+    	order.setEndDate(timeE);
+    	
+    	List<User> user;
+    	user = userMapper.queryallboss();
+    	
+    	for(int i = 0 ; i<user.size() ; i++ ){
+    		order.setStoreid(user.get(i).getStoreid());
+    		int fee = skuMapper.allmoney(order);    
+    		WithDrawDay temp = new WithDrawDay();
+    		temp.setFee(fee);
+    		temp.setOpenid(user.get(i).getOpenid());
+    		temp.setTime(timed);
+    		temp.setStoreid(user.get(i).getStoreid());
+    		temp.setState(0);
+    		withDrawMapper.savewith(temp);
+    		
+    		String paternerKey="79m1jyaofjonvahln1wnoq606rvbk2gi";
+    		Map<String, String> parm = new HashMap<String, String>();
+    		String orderNo = RandomStringGenerator.getRandomStringByLength(32);
+    		String feeS = Integer.toString(fee);
+    		
+    		parm.put("mch_appid", appid); //公众账号appid
+    		parm.put("mchid", "1472139902"); //商户号
+    		parm.put("nonce_str", RandomStringGenerator.getRandomStringByLength(32)); //随机字符串
+    		parm.put("partner_trade_no",orderNo); //商户订单号
+    		parm.put("openid", temp.getOpenid()); //用户openid	
+    		parm.put("check_name", "FORCE_CHECK"); //校验用户姓名选项 OPTION_CHECK
+    		parm.put("re_user_name", user.get(i).getNickname()); //check_name设置为FORCE_CHECK或OPTION_CHECK，则必填
+    		parm.put("amount", feeS); //转账金额
+    		parm.put("desc", "快点支付"); //企业付款描述信息		
+    		parm.put("spbill_create_ip", InetAddress.getLocalHost().getHostAddress());
+    		parm.put("sign", PayUtil.getSign(parm, paternerKey));
+    		
+    		HttpResult result2 = HttpUtils.posts("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", XmlUtil.xmlFormat(parm, false));
+			
+
+    		XStream xStream = new XStream();
+    		xStream.alias("xml", PayReturnInfo.class); 
+
+    		PayReturnInfo returnInfo = (PayReturnInfo)xStream.fromXML(result2.getBody());
+    		JSONObject json = new JSONObject();
+    		json.put("return_code", returnInfo.getReturn_code());
+    		json.put("return_msg", returnInfo.getReturn_msg());
+    		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
+    		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+    		if (returnInfo.getResult_code().equals("SUCCESS")) {
+    			temp.setState(1);		
+            }
+            else{
+            	temp.setState(2);
+            }
+    		
+    		withDrawMapper.updatewith(temp);
+    		
+    		}
+    	}
     }
     
     @RequestMapping("wxpay/check")

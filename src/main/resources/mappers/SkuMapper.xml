@@ -69,5 +69,15 @@
     	</if>
 	</select>
 	
+	<select id="queryorderid" parameterType="com.lxg.springboot.model.Order" resultType="int">
+		SELECT sum(fee*100) from orders where state='1' and storeid=#{storeid}
+		<if test="startDate != null and startDate != ''">
+    	and time &gt;= #{startDate}
+    	</if> 
+    	<if test="endDate != null and endDate != ''">
+    	and time &lt;= #{endDate}
+    	</if>
+	</select>
+	
 		
 </mapper>  

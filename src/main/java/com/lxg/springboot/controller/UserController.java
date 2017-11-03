@@ -69,7 +69,7 @@ public class UserController extends BaseController {
     
     @RequestMapping("login")
     public String login(User user) {    	
-    	if(userMapper.countboss(user)==1){
+    	if(userMapper.countboss(user)>=1){
     		List<User> userf ;
     		userf = userMapper.querybynoboss(user);
     		JSONObject json = new JSONObject();

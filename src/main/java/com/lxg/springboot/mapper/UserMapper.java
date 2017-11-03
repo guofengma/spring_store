@@ -29,4 +29,8 @@ public interface UserMapper {
 	
 	int countboss(User user);
 	
+	int bosspay();
+	
+	List<User> queryallboss();
+	
 }

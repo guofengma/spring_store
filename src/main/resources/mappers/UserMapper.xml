@@ -56,9 +56,17 @@
 		where phoneno=#{phoneno}
 	</select>
 	
-		<select id="countboss" parameterType="com.lxg.springboot.model.User" resultType="int">
+	<select id="countboss" parameterType="com.lxg.springboot.model.User" resultType="int">
 		select count(*) from userboss 
 		where phoneno=#{phoneno} and password=#{password} 
+	</select>
+	
+	<select id="bosspay" resultType="int">
+		select bosspay from systemparam limit 1
+	</select>
+	
+	<select id="queryallboss"  resultType="com.lxg.springboot.model.User">
+		select * from userboss 
 	</select>
 
 </mapper>  

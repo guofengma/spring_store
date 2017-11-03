@@ -36,4 +36,6 @@ public interface SkuMapper {
 	Intea count(Sku sku);
 	
 	List<OrderAll> queryorder(Order order);
+	
+	int allmoney(Order order);
 }

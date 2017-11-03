@@ -13,6 +13,29 @@
 		 where id=#{id}
 	</update>
 	
+	<update id="updatefield" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set deal=#{deal}
+		 where id=#{id}
+	</update>
+	
+	<update id="updatedeal" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set field=#{field}
+		 where id=#{id}
+	</update>
+	
+	
+	<update id="updatesupply" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set supply=#{supply}
+		 where id=#{id}
+	</update>
+	
+	<select id="queryone" parameterType="com.lxg.springboot.model.Apply" resultType="com.lxg.springboot.model.Apply">
+			select * from apply where id=#{id}
+	</select>
+	
 	<select id="query" parameterType="com.lxg.springboot.model.Apply" resultType="com.lxg.springboot.model.Apply">
 		select * from apply
 		limit #{page},#{pagenum}
@@ -25,5 +48,13 @@
 	
 	<select id="querymax" resultType="int">
 			select max(id) from apply
+	</select>
+	
+	<select id="querypage" parameterType="com.lxg.springboot.model.Apply" resultType="int">
+			select count(id) from apply
+	</select>
+	
+	<select id="querypagead" parameterType="com.lxg.springboot.model.Apply" resultType="int">
+			select count(apply.id) from field JOIN apply where apply.field = field.openid and field.address like CONCAT('%',#{address},'%')   
 	</select>
 </mapper>  
