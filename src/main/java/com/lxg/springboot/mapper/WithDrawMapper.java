@@ -17,4 +17,11 @@ public interface WithDrawMapper {
 	
 	int updatewith(WithDrawDay order);
 	
+	List<WithDrawDay> querywithman(WithDrawDay order);
+	
+	List<WithDrawDay> querywithstore(WithDrawDay order);
+	
+	int querywithmannum(WithDrawDay order);
+	
+	int querywithstorenum(WithDrawDay order);
 }

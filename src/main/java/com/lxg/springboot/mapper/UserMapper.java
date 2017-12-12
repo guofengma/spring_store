@@ -21,6 +21,8 @@ public interface UserMapper {
 
 	User queryboss(User user);
 	
+	User querybossrole(User user);
+	
 	User querybossbyid(User user);
 	
 	List<User> querybynoboss(User user);
@@ -28,6 +30,10 @@ public interface UserMapper {
 	int count(User user);
 	
 	int countboss(User user);
+	
+	int countbosss(User user);
+	
+	int countbossp(User user);
 	
 	int bosspay();
 	

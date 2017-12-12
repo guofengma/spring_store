@@ -8,10 +8,12 @@ import com.lxg.springboot.mapper.WithDrawMapper;
 import com.lxg.springboot.mapper.ShopMapper;
 import com.lxg.springboot.mapper.SkuMapper;
 import com.lxg.springboot.mapper.UserMapper;
+import com.lxg.springboot.model.Applypage;
 import com.lxg.springboot.model.Cart;
 import com.lxg.springboot.model.Good;
 import com.lxg.springboot.model.Shop;
 import com.lxg.springboot.model.HttpResult;
+import com.lxg.springboot.model.Msg;
 import com.lxg.springboot.model.Order;
 import com.lxg.springboot.model.OrderAll;
 import com.lxg.springboot.model.OrderGood;
@@ -20,10 +22,12 @@ import com.lxg.springboot.model.OrderReturnInfo;
 import com.lxg.springboot.model.Orderpage;
 import com.lxg.springboot.model.PayReturnInfo;
 import com.lxg.springboot.model.RefundReturnInfo;
+import com.lxg.springboot.model.ResultUtil;
 import com.lxg.springboot.model.SignInfo;
 import com.lxg.springboot.model.Token;
 import com.lxg.springboot.model.User;
 import com.lxg.springboot.model.WithDrawDay;
+import com.lxg.springboot.model.WithdrawPage;
 import com.lxg.springboot.service.HttpAPIService;
 import com.lxg.springboot.util.CollectionUtil;
 import com.lxg.springboot.util.HttpUtils;
@@ -38,9 +42,12 @@ import com.thoughtworks.xstream.XStream;
 
 import org.jdom.JDOMException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;  
@@ -314,9 +321,10 @@ public class WxPayController {
         }
     }
     
+    @Scheduled(cron = "0 15 6 ? * *" )
     @RequestMapping("wxpay/bosspay")
     public void bosspay() throws IOException {  
-    	if(userMapper.bosspay()==1){
+    	if(userMapper.bosspay() == 1){
     	Calendar c = Calendar.getInstance();
     	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
     	c.setTime(new Date());
@@ -330,24 +338,71 @@ public class WxPayController {
 		order.setStartDate(timeS);
     	order.setEndDate(timeE);
     	
-    	List<User> user;
-    	user = userMapper.queryallboss();
+    	List<Shop> shop;
+    	shop = shopMapper.query();
     	
-    	for(int i = 0 ; i<user.size() ; i++ ){
-    		order.setStoreid(user.get(i).getStoreid());
-    		int fee = skuMapper.allmoney(order);    
+    	for(int i = 0 ; i<shop.size() ; i++ ){
+    		order.setStoreid(shop.get(i).getStoreId());
+    		int fee = skuMapper.allmoney(order);       		
+    		long now =  System.currentTimeMillis();  
+    		String ms = now + "";
+    		String ccid = "f90524bd12ec53448f2cc7c178e757d07eb53772c2ab355b4d5c00abbcd36375";
+    		String url = "https://store.lianlianchains.com/alloc/invoke?func=allocEarning&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + shop.get(i).getStoreId()
+    				+ "&" + "slr=" + shop.get(i).getDeal() + "&"  + "pfm=" + shop.get(i).getDeal() + "&"  + "fld=" + shop.get(i).getField() + "&" + "dvy=" + shop.get(i).getSupply()
+    				+ "&" + "tamt=" + Integer.toString(fee) + "&ak=" + ms ;
+
+    		String res = null;
+			try {
+				res = httpAPIService.doGet(url);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		JSONObject json = JSON.parseObject(res);  
+    		String resc = json.getString("code");
+    		if (resc.equals("0")){
+    			url = "https://store.lianlianchains.com/alloc/query?func=queryRackAlloc&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + shop.get(i).getStoreId()
+        			 + "&ak=" + ms ;
+    		}
+    		try {
+				res = httpAPIService.doGet(url);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		JSONObject json1 = JSON.parseObject(res); 
+    		String resc1 = json1.getString("result");
+    		resc1 = resc1.substring(1,resc1.length()-1);
+    		JSONObject json2 = JSON.parseObject(resc1); 
+    		JSONObject json3 = json2.getJSONObject("amtmap");
+    		JSONObject amountsupply = json3.getJSONObject("dvy");
+    		int supply = amountsupply.getIntValue(shop.get(i).getSupply());
+    		JSONObject amountfield = json3.getJSONObject("fld");
+    		int field = amountfield.getIntValue(shop.get(i).getField());
+    		JSONObject amountboss = json3.getJSONObject("pfm");
+    		int plat = amountboss.getIntValue(shop.get(i).getDeal());
+    		JSONObject amountdeal = json3.getJSONObject("slr");
+    		int deal= amountdeal.getIntValue(shop.get(i).getDeal());
+    	
+    		int all = supply + field + plat + deal;
+    		 		
     		WithDrawDay temp = new WithDrawDay();
-    		temp.setFee(fee);
-    		temp.setOpenid(user.get(i).getOpenid());
+    		temp.setFee(deal);
+    		temp.setOpenid(shop.get(i).getDeal());
     		temp.setTime(timed);
-    		temp.setStoreid(user.get(i).getStoreid());
+    		temp.setStoreid(shop.get(i).getStoreId());
     		temp.setState(0);
-    		withDrawMapper.savewith(temp);
+    		String timevb = timed.toString();
+    		String descr = "日结算:" + timevb + shop.get(i).getStoreName() + "经营者";
+    		temp.setDescription(descr);
+    		
+    		
+    		withDrawMapper.savewith(temp); 
     		
     		String paternerKey="79m1jyaofjonvahln1wnoq606rvbk2gi";
     		Map<String, String> parm = new HashMap<String, String>();
     		String orderNo = RandomStringGenerator.getRandomStringByLength(32);
-    		String feeS = Integer.toString(fee);
+    		String feeS = Integer.toString(deal);
     		
     		parm.put("mch_appid", appid); //公众账号appid
     		parm.put("mchid", "1472139902"); //商户号
@@ -355,9 +410,9 @@ public class WxPayController {
     		parm.put("partner_trade_no",orderNo); //商户订单号
     		parm.put("openid", temp.getOpenid()); //用户openid	
     		parm.put("check_name", "FORCE_CHECK"); //校验用户姓名选项 OPTION_CHECK
-    		parm.put("re_user_name", user.get(i).getNickname()); //check_name设置为FORCE_CHECK或OPTION_CHECK，则必填
+    		parm.put("re_user_name",shop.get(i).getDealname()); //check_name设置为FORCE_CHECK或OPTION_CHECK，则必填
     		parm.put("amount", feeS); //转账金额
-    		parm.put("desc", "快点支付"); //企业付款描述信息		
+    		parm.put("desc", descr); //企业付款描述信息		
     		parm.put("spbill_create_ip", InetAddress.getLocalHost().getHostAddress());
     		parm.put("sign", PayUtil.getSign(parm, paternerKey));
     		
@@ -368,9 +423,161 @@ public class WxPayController {
     		xStream.alias("xml", PayReturnInfo.class); 
 
     		PayReturnInfo returnInfo = (PayReturnInfo)xStream.fromXML(result2.getBody());
-    		JSONObject json = new JSONObject();
-    		json.put("return_code", returnInfo.getReturn_code());
-    		json.put("return_msg", returnInfo.getReturn_msg());
+    		JSONObject jsonre = new JSONObject();
+    		jsonre.put("return_code", returnInfo.getReturn_code());
+    		jsonre.put("return_msg", returnInfo.getReturn_msg());
+    		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
+    		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+    		if (returnInfo.getResult_code().equals("SUCCESS")) {
+    			temp.setState(1);		
+            }
+            else{
+            	temp.setState(2);
+            }
+    		
+    		withDrawMapper.updatewith(temp);
+    		
+    		temp = new WithDrawDay();
+    		temp.setFee(supply);
+    		temp.setOpenid(shop.get(i).getSupply());
+    		temp.setTime(timed);
+    		temp.setStoreid(shop.get(i).getStoreId());
+    		temp.setState(0);
+    		timevb = timed.toString();
+    		descr = "日结算:" + timevb + shop.get(i).getStoreName() + "供货商";
+    		temp.setDescription(descr);
+    		   		
+    		withDrawMapper.savewith(temp); 
+    		
+    		paternerKey="79m1jyaofjonvahln1wnoq606rvbk2gi";
+    		parm = new HashMap<String, String>();
+    		orderNo = RandomStringGenerator.getRandomStringByLength(32);
+    		feeS = Integer.toString(deal);
+    		
+    		parm.put("mch_appid", appid); //公众账号appid
+    		parm.put("mchid", "1472139902"); //商户号
+    		parm.put("nonce_str", RandomStringGenerator.getRandomStringByLength(32)); //随机字符串
+    		parm.put("partner_trade_no",orderNo); //商户订单号
+    		parm.put("openid", temp.getOpenid()); //用户openid	
+    		parm.put("check_name", "FORCE_CHECK"); //校验用户姓名选项 OPTION_CHECK
+    		parm.put("re_user_name",shop.get(i).getSupplyname()); //check_name设置为FORCE_CHECK或OPTION_CHECK，则必填
+    		parm.put("amount", feeS); //转账金额
+    		parm.put("desc", descr); //企业付款描述信息		
+    		parm.put("spbill_create_ip", InetAddress.getLocalHost().getHostAddress());
+    		parm.put("sign", PayUtil.getSign(parm, paternerKey));
+    		
+    		result2 = HttpUtils.posts("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", XmlUtil.xmlFormat(parm, false));
+			
+
+    		xStream = new XStream();
+    		xStream.alias("xml", PayReturnInfo.class); 
+
+    		returnInfo = (PayReturnInfo)xStream.fromXML(result2.getBody());
+    		jsonre = new JSONObject();
+    		jsonre.put("return_code", returnInfo.getReturn_code());
+    		jsonre.put("return_msg", returnInfo.getReturn_msg());
+    		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
+    		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+    		if (returnInfo.getResult_code().equals("SUCCESS")) {
+    			temp.setState(1);		
+            }
+            else{
+            	temp.setState(2);
+            }
+    		
+    		withDrawMapper.updatewith(temp);
+    		
+
+    		temp = new WithDrawDay();
+    		temp.setFee(field);
+    		temp.setOpenid(shop.get(i).getField());
+    		temp.setTime(timed);
+    		temp.setStoreid(shop.get(i).getStoreId());
+    		temp.setState(0);
+    		timevb = timed.toString();
+    		descr = "日结算:" + timevb + shop.get(i).getStoreName() + "场地";
+    		temp.setDescription(descr);
+    		   		
+    		withDrawMapper.savewith(temp); 
+    		
+    		paternerKey="79m1jyaofjonvahln1wnoq606rvbk2gi";
+    		parm = new HashMap<String, String>();
+    		orderNo = RandomStringGenerator.getRandomStringByLength(32);
+    		feeS = Integer.toString(deal);
+    		
+    		parm.put("mch_appid", appid); //公众账号appid
+    		parm.put("mchid", "1472139902"); //商户号
+    		parm.put("nonce_str", RandomStringGenerator.getRandomStringByLength(32)); //随机字符串
+    		parm.put("partner_trade_no",orderNo); //商户订单号
+    		parm.put("openid", temp.getOpenid()); //用户openid	
+    		parm.put("check_name", "FORCE_CHECK"); //校验用户姓名选项 OPTION_CHECK
+    		parm.put("re_user_name",shop.get(i).getFieldname()); //check_name设置为FORCE_CHECK或OPTION_CHECK，则必填
+    		parm.put("amount", feeS); //转账金额
+    		parm.put("desc", descr); //企业付款描述信息		
+    		parm.put("spbill_create_ip", InetAddress.getLocalHost().getHostAddress());
+    		parm.put("sign", PayUtil.getSign(parm, paternerKey));
+    		
+    		result2 = HttpUtils.posts("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", XmlUtil.xmlFormat(parm, false));
+			
+
+    		xStream = new XStream();
+    		xStream.alias("xml", PayReturnInfo.class); 
+
+    		returnInfo = (PayReturnInfo)xStream.fromXML(result2.getBody());
+    		jsonre = new JSONObject();
+    		jsonre.put("return_code", returnInfo.getReturn_code());
+    		jsonre.put("return_msg", returnInfo.getReturn_msg());
+    		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
+    		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+    		if (returnInfo.getResult_code().equals("SUCCESS")) {
+    			temp.setState(1);		
+            }
+            else{
+            	temp.setState(2);
+            }
+    		
+    		withDrawMapper.updatewith(temp);
+    		
+
+    		temp = new WithDrawDay();
+    		temp.setFee(plat);
+    		temp.setOpenid(shop.get(i).getDeal());
+    		temp.setTime(timed);
+    		temp.setStoreid(shop.get(i).getStoreId());
+    		temp.setState(0);
+    		timevb = timed.toString();
+    		descr = "日结算:" + timevb + shop.get(i).getStoreName() + "平台";
+    		temp.setDescription(descr);
+    		   		
+    		withDrawMapper.savewith(temp); 
+    		
+    		paternerKey="79m1jyaofjonvahln1wnoq606rvbk2gi";
+    		parm = new HashMap<String, String>();
+    		orderNo = RandomStringGenerator.getRandomStringByLength(32);
+    		feeS = Integer.toString(deal);
+    		
+    		parm.put("mch_appid", appid); //公众账号appid
+    		parm.put("mchid", "1472139902"); //商户号
+    		parm.put("nonce_str", RandomStringGenerator.getRandomStringByLength(32)); //随机字符串
+    		parm.put("partner_trade_no",orderNo); //商户订单号
+    		parm.put("openid", temp.getOpenid()); //用户openid	
+    		parm.put("check_name", "FORCE_CHECK"); //校验用户姓名选项 OPTION_CHECK
+    		parm.put("re_user_name",shop.get(i).getDealname()); //check_name设置为FORCE_CHECK或OPTION_CHECK，则必填
+    		parm.put("amount", feeS); //转账金额
+    		parm.put("desc", descr); //企业付款描述信息		
+    		parm.put("spbill_create_ip", InetAddress.getLocalHost().getHostAddress());
+    		parm.put("sign", PayUtil.getSign(parm, paternerKey));
+    		
+    		result2 = HttpUtils.posts("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", XmlUtil.xmlFormat(parm, false));
+			
+
+    		xStream = new XStream();
+    		xStream.alias("xml", PayReturnInfo.class); 
+
+    		returnInfo = (PayReturnInfo)xStream.fromXML(result2.getBody());
+    		jsonre = new JSONObject();
+    		jsonre.put("return_code", returnInfo.getReturn_code());
+    		jsonre.put("return_msg", returnInfo.getReturn_msg());
     		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
     		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
     		if (returnInfo.getResult_code().equals("SUCCESS")) {
@@ -384,6 +591,36 @@ public class WxPayController {
     		
     		}
     	}
+    }
+    
+    @RequestMapping("CVS/querywithuser")
+    public Msg querywithman(WithDrawDay order) throws IOException {  	
+    	int tempnum = 0;
+    	tempnum = order.getPage();
+    	order.setPage(tempnum*order.getPagenum());
+    	List<WithDrawDay> temp;  
+    	temp = withDrawMapper.querywithman(order);
+    	WithdrawPage withdrawPage = new WithdrawPage();
+    	withdrawPage.setWithDrawDay(temp);
+    	tempnum = withDrawMapper.querywithmannum(order);
+    	withdrawPage.setTotalpage(tempnum/order.getPagenum()+1); 
+    	
+    	return ResultUtil.success(withdrawPage);
+    }
+    
+    @RequestMapping("CVS/querywithstore")
+    public Msg querywithstore(WithDrawDay order) throws IOException {  
+    	int tempnum = 0;
+    	tempnum = order.getPage();
+    	order.setPage(tempnum*order.getPagenum());
+    	List<WithDrawDay> temp;  
+    	temp = withDrawMapper.querywithstore(order);
+    	WithdrawPage withdrawPage = new WithdrawPage();
+    	withdrawPage.setWithDrawDay(temp);
+    	tempnum = withDrawMapper.querywithstorenum(order);
+    	withdrawPage.setTotalpage(tempnum/order.getPagenum()+1); 
+    	return ResultUtil.success(withdrawPage);
+             	
     }
     
     @RequestMapping("wxpay/check")

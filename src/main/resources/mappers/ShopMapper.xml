@@ -6,12 +6,17 @@
 		values (#{StoreId},#{address},#{StoreName},#{lng},#{lat})
 	</select>
 	
+	<select id="insertmore" parameterType="com.lxg.springboot.model.Shop">
+		insert into store(StoreId,address,StoreName,lng,lat,deal,dealname,field,fieldname,supply,supplyname)
+		values (#{StoreId},#{address},#{StoreName},#{lng},#{lat},#{deal},#{dealname},#{field},#{fieldname},#{supply},#{supplyname})
+	</select>
+	
 	<select id="query" resultType="com.lxg.springboot.model.Shop">
 		select * from store 
 	</select>
 	
 	<select id="querybyid" resultType="com.lxg.springboot.model.Shop">
-		select * from store where storeid=#{storeid}
+		select * from store where StoreId=#{StoreId}
 	</select>
 	
 	<select id="totle" parameterType="com.lxg.springboot.model.Order" resultType="com.lxg.springboot.model.Order">

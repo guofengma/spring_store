@@ -14,10 +14,10 @@ public class ResultUtil {
         return msg;  
     }
     
-    public static Msg fail(){  
+    public static Msg fail(String msg1){  
         Msg msg=new Msg();  
         msg.setEc("999999");  
-        msg.setMsg("系统异常");   
+        msg.setMsg(msg1);   
         return msg;  
     }  
     public static Msg success(){  

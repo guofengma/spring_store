@@ -17,6 +17,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
     public Msg defaultErrorHandler(HttpServletRequest req, Exception e) throws Exception {
-    	 return ResultUtil.fail();
+    	 return ResultUtil.fail("系统异常");
     }
 }

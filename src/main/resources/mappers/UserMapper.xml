@@ -30,20 +30,25 @@
 	</select>
 	
 	<insert id="saveboss" parameterType="com.lxg.springboot.model.User">
-		insert into userboss(openid,nickname,sex,age,phoneno,address,storeid)
-		values (#{openid},#{nickname},#{sex},#{age},#{phoneno},#{address},#{storeid})
+		insert into userboss(openid,nickname,role,age,phoneno,address,storeid,password)
+		values (#{openid},#{nickname},#{role},#{age},#{phoneno},#{address},#{storeid},#{password})
 	</insert>
 	
 	<update id="updateboss" parameterType="com.lxg.springboot.model.User">
 		 update userboss 
 		 set openid=#{openid},nickname=#{nickname},
-		 sex=#{sex},age=#{age},phoneno=#{phoneno},address=#{address} 
+		 role=#{role},age=#{age},phoneno=#{phoneno},address=#{address} 
 		 where openid=#{openid} and storeid=#{storeid}
 	</update>
 	
 	<select id="queryboss" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
 		select * from userboss 
 		where openid=#{openid} and storeid=#{storeid}
+	</select>
+	
+	<select id="querybossrole" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
+		select * from userboss 
+		where role=#{role} and storeid=#{storeid}
 	</select>
 	
 	<select id="querybossbyid" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
@@ -67,6 +72,16 @@
 	
 	<select id="queryallboss"  resultType="com.lxg.springboot.model.User">
 		select * from userboss 
+	</select>
+	
+	<select id="countbosss" parameterType="com.lxg.springboot.model.User" resultType="int">
+		select count(*) from userboss 
+		where storeid=#{storeid} 
+	</select>
+	
+	<select id="countbossp" parameterType="com.lxg.springboot.model.User" resultType="int">
+		select count(*) from userboss 
+		where phoneno=#{phoneno} 
 	</select>
 
 </mapper>  

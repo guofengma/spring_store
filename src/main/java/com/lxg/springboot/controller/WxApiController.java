@@ -1,6 +1,8 @@
 package com.lxg.springboot.controller;
 
+import com.lxg.springboot.mapper.ShopMapper;
 import com.lxg.springboot.model.HttpResult;
+import com.lxg.springboot.model.Shop;
 import com.lxg.springboot.model.Token;
 import com.lxg.springboot.service.HttpAPIService;
 import com.lxg.springboot.util.AesCbcUtil;
@@ -30,9 +32,12 @@ public class WxApiController {
 	private String appid;
 	@Value("${wx.appSecret}")
 	private String appSecret;
+	
 
 	@Resource
 	private HttpAPIService httpAPIService;
+	@Resource
+    private ShopMapper shopMapper;
 
 	@RequestMapping("wx/getopenid")
 	public String getopenid(String code) throws Exception {
@@ -189,7 +194,7 @@ public class WxApiController {
 
 		Token token = JSON.parseObject(httpAPIService.doGet(urltoken), Token.class);
 
-		String url = "https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode?access_token="
+		String url = "https://api.weixin.qq.com/wxa/getwxacode?access_token="
 				+ token.getAccess_token();
 
 		// 参数
@@ -198,6 +203,43 @@ public class WxApiController {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("path","pages/index/index"+"?StoreId="+ StoreId+"&StoreName="+ StoreName);
 		map.put("width",width);
+
+		HashMap<String, Object> maptemp = new HashMap<String, Object>();
+		maptemp.put("Jsondata", JSON.toJSONString(map));
+
+		// 请求头
+		HashMap<String, Object> header = new HashMap<String, Object>();
+
+		byte[] data = httpAPIService.doPostImg(url, maptemp, header);
+		response.setContentType("image/png");
+
+        OutputStream stream = response.getOutputStream();
+        stream.write(data);
+        stream.flush();
+        stream.close();
+	}
+	
+	@RequestMapping("CVS/apply/getTwoBarCodes")
+	public void  getTwoBar(String storeid,HttpServletResponse response) throws Exception {
+		
+		Shop retshop = new Shop();
+    	retshop = shopMapper.querybyid(storeid);
+    	
+		// 获取token
+		String urltoken = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&" + "appid=" + appid
+				+ "&" + "secret=" + appSecret;
+
+		Token token = JSON.parseObject(httpAPIService.doGet(urltoken), Token.class);
+
+		String url = "https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode?access_token="
+				+ token.getAccess_token();
+
+		// 参数
+
+		// 参数
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("path","pages/index/index"+"?StoreId="+ storeid+"&StoreName="+ retshop.getStoreName());
+		map.put("width",5000);
 
 		HashMap<String, Object> maptemp = new HashMap<String, Object>();
 		maptemp.put("Jsondata", JSON.toJSONString(map));

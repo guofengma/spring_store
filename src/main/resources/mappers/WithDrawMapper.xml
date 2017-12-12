@@ -18,15 +18,36 @@
 		where openid=#{openid}
 	</select>
 	
-	<insert id="save" parameterType="com.lxg.springboot.model.WithDrawDay">
-		insert into withdrawday(openid,fee,time,state,storeid)
-		values (#{openid},#{fee},#{time},#{state},#{storeid})
+	<insert id="savewith" parameterType="com.lxg.springboot.model.WithDrawDay">
+		insert into withdrawday(openid,fee,time,state,storeid,description)
+		values (#{openid},#{fee},#{time},#{state},#{storeid},#{description})
 	</insert>
 	
-	<update id="update" parameterType="com.lxg.springboot.model.WithDrawDay">
+	<update id="updatewith" parameterType="com.lxg.springboot.model.WithDrawDay">
 		 update withdrawday 
 		 set state=#{state}
 		 where storeid=#{storeid} and time=#{time}
 	</update>
+	
+	<select id="querywithman" parameterType="com.lxg.springboot.model.WithDrawDay" resultType="com.lxg.springboot.model.WithDrawDay">
+		select * from withdrawday where openid=#{openid} ORDER BY time DESC
+		limit #{page},#{pagenum}		
+	</select>
+	
+	<select id="querywithstore" parameterType="com.lxg.springboot.model.WithDrawDay" resultType="com.lxg.springboot.model.WithDrawDay">
+		select * from withdrawday 
+		where openid=#{openid} and  storeid=#{storeid} ORDER BY time DESC
+		limit #{page},#{pagenum}
+	</select>
+	
+		<select id="querywithmannum" parameterType="com.lxg.springboot.model.WithDrawDay" resultType="int">
+		select count(*) from withdrawday 
+		where openid=#{openid}
+	</select>
+	
+	<select id="querywithstorenum" parameterType="com.lxg.springboot.model.WithDrawDay" resultType="int">
+		select count(*) from withdrawday 
+		where openid=#{openid} and  storeid=#{storeid}
+	</select>
 	
 </mapper>  

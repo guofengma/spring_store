@@ -23,6 +23,8 @@ public class User extends BasicObject {
 	private String address;
 	
 	private String password;
+	
+	private String role;
 
 	public String getOpenid() {
 		return openid;
@@ -84,5 +86,13 @@ public class User extends BasicObject {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
 	}
 }

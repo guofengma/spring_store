@@ -76,6 +76,7 @@ public class UserController extends BaseController {
     		json.put("returncode", "00");
     		json.put("returnmsg","登陆成功");
     		json.put("storeid",userf);
+    		json.put("role",userf.get(0).getRole());
     		return json.toJSONString();
     	}
     	else{

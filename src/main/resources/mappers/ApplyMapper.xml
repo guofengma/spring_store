@@ -3,25 +3,71 @@
 <mapper namespace="com.lxg.springboot.mapper.ApplyMapper">
 
 	<insert id="save" parameterType="com.lxg.springboot.model.Apply">
-		insert into apply(id,field,deal,supply)
-		values (#{id},#{field},#{deal},#{supply})
+		insert into apply(id,field,deal,supply,storename)
+		values (#{id},#{field},#{deal},#{supply},#{storename})
 	</insert>
 	
 	<update id="update" parameterType="com.lxg.springboot.model.Apply">
 		 update apply 
-		 set field=#{field},deal=#{deal},supply=#{supply},fieldstate=#{fieldstate},dealstate=#{dealstate},supplystate=#{supplystate}
+		 set fieldstate=#{fieldstate},dealstate=#{dealstate},supplystate=#{supplystate}
+		 where id=#{id}
+	</update>
+	
+	<update id="delete" parameterType="com.lxg.springboot.model.Apply">
+		 delete from apply where id=#{id}
+	</update>
+	
+	<update id="updatefieldstate" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set fieldstate=#{fieldstate}
+		 where id=#{id}
+	</update>
+	
+	<update id="updatedealstate" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set dealstate=#{dealstate}
+		 where id=#{id}
+	</update>
+	
+	<update id="updatesupplystate" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set supplystate=#{supplystate}
+		 where id=#{id}
+	</update>
+	
+	<update id="updatefieldper" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set fieldper=#{fieldper}
+		 where id=#{id}
+	</update>
+	
+	<update id="updatedealper" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set dealper=#{dealper}
+		 where id=#{id}
+	</update>
+	
+	<update id="updatesupplyper" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set supplyper=#{supplyper}
+		 where id=#{id}
+	</update>
+	
+	<update id="updateplatper" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set platper=#{platper}
 		 where id=#{id}
 	</update>
 	
 	<update id="updatefield" parameterType="com.lxg.springboot.model.Apply">
 		 update apply 
-		 set deal=#{deal}
+		 set field=#{field}
 		 where id=#{id}
 	</update>
 	
 	<update id="updatedeal" parameterType="com.lxg.springboot.model.Apply">
 		 update apply 
-		 set field=#{field}
+		 set deal=#{deal}
 		 where id=#{id}
 	</update>
 	
@@ -32,17 +78,48 @@
 		 where id=#{id}
 	</update>
 	
+	<update id="updatename" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set storename=#{storename}
+		 where id=#{id}
+	</update>
+	
+	<update id="updateaddress" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set address=#{address}
+		 where id=#{id}
+	</update>
+	
+	<update id="updatefieldaddress" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set fieldaddress=#{fieldaddress},comname=#{comname},comnum=#{comnum},fieldname=#{fieldname},fieldphone=#{fieldphone},fieldfee=#{fieldfee},img1=#{img1},img2=#{img2},img3=#{img3}
+		 where id=#{id}
+	</update>
+	
+	<update id="updatedealaddress" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set dealaddress=#{dealaddress},dealname=#{dealname},dealphone=#{dealphone}
+		 where id=#{id}
+	</update>
+	
+	<update id="updatesupplyaddress" parameterType="com.lxg.springboot.model.Apply">
+		 update apply 
+		 set supplyaddress=#{supplyaddress},supplyname=#{supplyname},supplyphone=#{supplyphone},goodtype=#{goodtype}
+		 where id=#{id}
+	</update>
+	
 	<select id="queryone" parameterType="com.lxg.springboot.model.Apply" resultType="com.lxg.springboot.model.Apply">
 			select * from apply where id=#{id}
 	</select>
 	
 	<select id="query" parameterType="com.lxg.springboot.model.Apply" resultType="com.lxg.springboot.model.Apply">
-		select * from apply
+		SELECT * from apply
+		order by id desc
 		limit #{page},#{pagenum}
 	</select>	
 	
 	<select id="querybyad" parameterType="com.lxg.springboot.model.Apply" resultType="com.lxg.springboot.model.Apply">
-		SELECT apply.id,apply.deal,apply.dealstate,apply.field,apply.fieldstate,apply.supply,apply.supplystate from field JOIN apply where apply.field = field.openid and field.address like CONCAT('%',#{address},'%')   
+		SELECT * FROM apply where ( fieldaddress like CONCAT('%',#{address},'%') or dealaddress like CONCAT('%',#{address},'%') or supplyaddress like CONCAT('%',#{address},'%'))  ORDER BY id DESC
 		limit #{page},#{pagenum}
 	</select>
 	
@@ -53,8 +130,32 @@
 	<select id="querypage" parameterType="com.lxg.springboot.model.Apply" resultType="int">
 			select count(id) from apply
 	</select>
-	
+		
 	<select id="querypagead" parameterType="com.lxg.springboot.model.Apply" resultType="int">
-			select count(apply.id) from field JOIN apply where apply.field = field.openid and field.address like CONCAT('%',#{address},'%')   
+			SELECT count(apply.id) from apply where ( fieldaddress like CONCAT('%',#{address},'%') or dealaddress like CONCAT('%',#{address},'%') or supplyaddress like CONCAT('%',#{address},'%'))
 	</select>
+	
+	<select id="fieldcount" parameterType="com.lxg.springboot.model.Apply" resultType="int">
+			select count(id) from apply where field = #{field}
+	</select>
+	
+	<select id="dealcount" parameterType="com.lxg.springboot.model.Apply" resultType="int">
+			select count(id) from apply where deal = #{deal}
+	</select>
+	
+	<select id="supplycount" parameterType="com.lxg.springboot.model.Apply" resultType="int">
+			select count(id) from apply where deal = #{deal}
+	</select>
+	
+	<select id="queryfield" parameterType="com.lxg.springboot.model.Field" resultType="com.lxg.springboot.model.Field">
+       SELECT comname,comnum,fieldname as name , fieldfee as fee , fieldphone as phone , fieldaddress as address , img1,img2,img3 FROM apply  where id=#{id}
+    </select>  
+    
+    <select id="querydeal" parameterType="com.lxg.springboot.model.Field" resultType="com.lxg.springboot.model.Field">
+        SELECT dealname as name,dealaddress as address,dealphone as phone FROM apply where id=#{id}
+    </select>  
+    
+    <select id="querysupply" parameterType="com.lxg.springboot.model.Field" resultType="com.lxg.springboot.model.Field">
+		SELECT supplyname as name , supplyaddress as address ,supplyphone as phone , goodtype FROM apply  where id=#{id}
+	</select>	
 </mapper>  

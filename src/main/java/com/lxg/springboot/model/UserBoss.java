@@ -22,6 +22,8 @@ public class UserBoss extends BasicObject {
 	
 	private String address;
 	
+	private String role;
+	
 	private String password;
 	
 	private String startDate;//时间
@@ -104,5 +106,13 @@ public class UserBoss extends BasicObject {
 
 	public void setEndDate(String endDate) {
 		this.endDate = endDate;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
 	}
 }

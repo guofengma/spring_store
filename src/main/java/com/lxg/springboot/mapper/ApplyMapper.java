@@ -11,6 +11,8 @@ public interface ApplyMapper {
 	
 	void update(Apply apply);
 	
+	void delete(Apply apply);
+	
 	Apply queryone(Apply apply);
 	
 	List<Apply> query(Apply apply);
@@ -28,5 +30,41 @@ public interface ApplyMapper {
 	void updatedeal(Apply apply);
 	
 	void updatesupply(Apply apply);
+	
+	void updatename(Apply apply);
+	
+	void updateaddress(Apply apply);
+	
+	void updatefieldaddress(Apply apply);
+	
+	void updatedealaddress(Apply apply);
+	
+	void updatesupplyaddress(Apply apply);
+	
+	void updatefieldstate(Apply apply);
+	
+	void updatedealstate(Apply apply);
+	
+	void updatesupplystate(Apply apply);
+	
+	void updatefieldper(Apply apply);
+	
+	void updatedealper(Apply apply);
+	
+	void updatesupplyper(Apply apply);
+	
+	void updateplatper(Apply apply);
+	
+	int fieldcount(Apply apply);
+	
+	int dealcount(Apply apply);
+	
+	int supplycount(Apply apply);
+	
+	Field queryfield(Apply apply);
+	
+	Field querydeal(Apply apply);
+	
+	Field querysupply(Apply apply);
 	
 }
