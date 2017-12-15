@@ -74,7 +74,7 @@ public class ApplyController extends BaseController {
     		apply.setFieldphone(field.getPhone());
     		apply.setImg1(field.getImg1());
     		apply.setImg2(field.getImg2());
-    		apply.setImg2(field.getImg3());
+    		apply.setImg3(field.getImg3());
     		applyMapper.updatefieldaddress(apply);
     		}
     		else{
@@ -158,7 +158,7 @@ public class ApplyController extends BaseController {
     		apply.setFieldphone(field.getPhone());
     		apply.setImg1(field.getImg1());
     		apply.setImg2(field.getImg2());
-    		apply.setImg2(field.getImg3());
+    		apply.setImg3(field.getImg3());
     		applyMapper.updatefieldaddress(apply);}
     		else{
     			return ResultUtil.fail("场地提供超过10个");	
@@ -175,7 +175,7 @@ public class ApplyController extends BaseController {
     		apply.setFieldphone("");
     		apply.setImg1("");
     		apply.setImg2("");
-    		apply.setImg2("");
+    		apply.setImg3("");
     		applyMapper.updatefieldaddress(apply);
     		applyMapper.updatefieldstate(apply);
     	}
@@ -534,7 +534,7 @@ public class ApplyController extends BaseController {
     	user.setRole("boss");
     	userMapper.saveboss(user);
     	
-    	String ccid = "1934a18282c61cdd0e83d37b2e68a5a2f95c70ef3fb592bebf0951b40e0ef502";
+    	String ccid = "522b9d2ff03357ff0fd6eb7a2b18cdcc01182f74de0165a4b535ee743bc475bd";
 		String urla = "https://store.lianlianchains.com/alloc/invoke?func=setAllocCfg&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + id
 				+ "&" + "slr=" + apply.getDealper() + "&"  + "pfm=" + apply.getPlatper() + "&"  + "fld=" + apply.getFieldper() + "&" + "dvy=" + apply.getSupplyper();
 		

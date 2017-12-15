@@ -5,6 +5,7 @@ import java.util.List;
 import com.lxg.springboot.model.Sku;
 import com.lxg.springboot.model.Order;
 import com.lxg.springboot.model.OrderAll;
+import com.lxg.springboot.model.IncreaseMoney;
 import com.lxg.springboot.model.Intea;;
 
 public interface SkuMapper {
@@ -38,4 +39,12 @@ public interface SkuMapper {
 	List<OrderAll> queryorder(Order order);
 	
 	int allmoney(Order order);
+	
+	int increasenum(IncreaseMoney increasem);
+	
+	int increasebyusernum(IncreaseMoney increasem);
+	
+	List<IncreaseMoney> increaseall(IncreaseMoney increasem);
+	
+	List<IncreaseMoney> increasebyuser(IncreaseMoney increasem);
 }

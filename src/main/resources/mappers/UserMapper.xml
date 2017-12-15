@@ -5,7 +5,7 @@
 	<insert id="save" parameterType="com.lxg.springboot.model.User">
 		insert into user(openid,nickname,sex,age,phoneno,address)
 		values (#{openid},#{nickname},#{sex},#{age},#{phoneno},#{address})
-	</insert>
+	</insert>	
 	
 	<update id="update" parameterType="com.lxg.springboot.model.User">
 		 update user 
@@ -53,7 +53,7 @@
 	
 	<select id="querybossbyid" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
 		select * from userboss 
-		where storeid=#{storeid}
+		where storeid=#{storeid} and role='boss'
 	</select>
 		
 	<select id="querybynoboss" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
@@ -71,7 +71,7 @@
 	</select>
 	
 	<select id="queryallboss"  resultType="com.lxg.springboot.model.User">
-		select * from userboss 
+		select * from userboss  
 	</select>
 	
 	<select id="countbosss" parameterType="com.lxg.springboot.model.User" resultType="int">
@@ -82,6 +82,16 @@
 	<select id="countbossp" parameterType="com.lxg.springboot.model.User" resultType="int">
 		select count(*) from userboss 
 		where phoneno=#{phoneno} 
+	</select>
+	
+	<insert id="saveunion" parameterType="com.lxg.springboot.model.Union">
+		INSERT INTO unionopen (openid, unionid)
+		values (#{openid},#{unionid})
+	</insert>
+	
+	<select id="getunionid" parameterType="String" resultType="String">
+		select unionid from unionopen
+		where openid=#{openid} 
 	</select>
 
 </mapper>  

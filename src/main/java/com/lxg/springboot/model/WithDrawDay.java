@@ -13,11 +13,19 @@ public class WithDrawDay {
 	
 	private String storeid;
 	
+	private String storename;
+	
 	private String description;
+	
+	private String role;
+	
+	private String errmsg;
 	
 	private int page;
 	
 	private int pagenum;
+	
+	private double feeformat;
 
 
 	public String getOpenid() {
@@ -82,6 +90,38 @@ public class WithDrawDay {
 
 	public void setPagenum(int pagenum) {
 		this.pagenum = pagenum;
+	}
+
+	public String getStorename() {
+		return storename;
+	}
+
+	public void setStorename(String storename) {
+		this.storename = storename;
+	}
+
+	public double getFeeformat() {
+		return feeformat;
+	}
+
+	public void setFeeformat(double feeformat) {
+		this.feeformat = feeformat;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public String getErrmsg() {
+		return errmsg;
+	}
+
+	public void setErrmsg(String errmsg) {
+		this.errmsg = errmsg;
 	}
 
 

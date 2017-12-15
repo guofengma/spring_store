@@ -24,4 +24,10 @@ public interface WithDrawMapper {
 	int querywithmannum(WithDrawDay order);
 	
 	int querywithstorenum(WithDrawDay order);
+	
+	int querywithmansum(WithDrawDay order);
+	
+	List<WithDrawDay> querywithstoresum(WithDrawDay order);
+	
+	int querywithstoresumnum(WithDrawDay order);
 }

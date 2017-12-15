@@ -13,6 +13,8 @@ import com.lxg.springboot.model.Cart;
 import com.lxg.springboot.model.Good;
 import com.lxg.springboot.model.Shop;
 import com.lxg.springboot.model.HttpResult;
+import com.lxg.springboot.model.IncreaseMoney;
+import com.lxg.springboot.model.IncreasePage;
 import com.lxg.springboot.model.Msg;
 import com.lxg.springboot.model.Order;
 import com.lxg.springboot.model.OrderAll;
@@ -178,6 +180,40 @@ public class WxPayController {
 		json.put("return_msg", returnInfo.getReturn_msg());
 		json.put("orderNo", orderNo);
 		
+		String userunion = userMapper.getunionid(Order.getOpenid());
+		User tempuser = new User();
+		tempuser.setStoreid(Order.getStoreid());
+		User Boss=userMapper.querybossbyid(tempuser);
+		String bossunion = userMapper.getunionid(Boss.getOpenid());
+		String ccid = "292bed8e86bc425bbd9351d6af4ed51bd80c40a00633843cf63028498837e178";
+		String urla ="";
+		String res="";
+				
+		if(Order.getUsedScore() > 0){
+			
+	    	
+			urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&" + "reacc=" + bossunion +  "&" + "amt=" + Order.getUsedScore() + "&tstp=消费抵扣积分&desc=''" ;
+			
+			res = null;
+			
+			try {
+				res = httpAPIService.doGet(urla);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			JSONObject json2 = JSON.parseObject(res);  
+			String resc = json2.getString("code");
+			
+			if (!resc.equals("0")){
+				return "区块链连接错误";
+			}	
+			
+		}
+		
+		
+		
 		return json.toJSONString();
     }
     
@@ -234,6 +270,7 @@ public class WxPayController {
         Order.setOrderNo(map.get("out_trade_no"));
         Order tempOrder = new Order();
         tempOrder = orderMapper.querybyno(Order);
+        String openid = Order.getOpenid();
         if(tempOrder.getState()!=1){        	
         if (map.get("result_code").equals("SUCCESS")) {      	
         	Order.setState(1);
@@ -292,6 +329,29 @@ public class WxPayController {
     			// TODO Auto-generated catch block
     			e.printStackTrace();
     		}	
+    		
+    		String userunion = userMapper.getunionid(openid);
+    		tempuser.setStoreid(Order.getStoreid());
+    		String bossunion = userMapper.getunionid(Boss.getOpenid());
+    		String ccid = "292bed8e86bc425bbd9351d6af4ed51bd80c40a00633843cf63028498837e178";
+    		String urla ="";
+    		String res="";
+    		
+    		urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + bossunion	+ "&" + "acc=" + bossunion + "&" + "reacc=" + userunion +  "&" + "amt=5" + "&tstp=消费奖励积分&desc=''" ;
+    		
+    		res = null;
+    		
+    		try {
+    			res = httpAPIService.doGet(urla);
+    		} catch (Exception e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+    		
+    		JSONObject json1 = JSON.parseObject(res);  
+    		String resc1 = json1.getString("code");
+    		
+    		
     		if(userMapper.bosspay()== 0){
     		HttpResult result2 = HttpUtils.posts("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", XmlUtil.xmlFormat(parm, false));
     			
@@ -320,8 +380,92 @@ public class WxPayController {
         }                  
         }
     }
+    @RequestMapping("wxpay/increaseall")
+    public Msg increaseall(IncreaseMoney inc) throws IOException { 
+    	int tempnum = 0;
+    	tempnum = inc.getPage();
+    	inc.setPage(tempnum*inc.getPagenum());
+    	Calendar c8 = Calendar.getInstance();
+    	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
+    	c8.setTime(new Date());
+        c8.add(Calendar.DATE, - 8); 
+        Date d8 = c8.getTime();
+        String timed8=format.format(d8);        
+        Calendar c1 = Calendar.getInstance();
+        c1.setTime(new Date());
+        c1.add(Calendar.DATE, - 1); 
+        Date d1 = c1.getTime();
+        String timed1=format.format(d1);     
+		String timeS = timed8 + "000000";
+		String timeE = timed1 + "235959";
+		inc.setStartDate1(timeS);
+		inc.setEndDate1(timeE);
+		Calendar c15 = Calendar.getInstance();
+		c15.setTime(new Date());
+		c15.add(Calendar.DATE, - 15); 
+		Date d15 = c15.getTime();
+        String timed15=format.format(d15); 
+        String timeS2 = timed15 + "000000";
+		String timeE2 = timed8 + "235959";
+		inc.setStartDate2(timeS2);
+		inc.setEndDate2(timeE2);
+		
+		List<IncreaseMoney> temp;  
+    	temp = skuMapper.increaseall(inc);
+    	IncreasePage increasePage = new IncreasePage();
+    	increasePage.setIncreasMoney(temp);
+    	tempnum = skuMapper.increasenum(inc);
+    	increasePage.setTotalpage(tempnum/inc.getPagenum()+1); 
+    	
+    	return ResultUtil.success(increasePage);
+		
+    }
     
-    @Scheduled(cron = "0 15 6 ? * *" )
+    @RequestMapping("wxpay/increaseuser")
+    public Msg increasealluser(IncreaseMoney inc) throws IOException { 
+    	int tempnum = 0;
+    	tempnum = inc.getPage();
+    	inc.setPage(tempnum*inc.getPagenum());
+    	Calendar c8 = Calendar.getInstance();
+    	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
+    	c8.setTime(new Date());
+        c8.add(Calendar.DATE, - 8); 
+        Date d8 = c8.getTime();
+        String timed8=format.format(d8);        
+        Calendar c1 = Calendar.getInstance();
+        c1.setTime(new Date());
+        c1.add(Calendar.DATE, - 1); 
+        Date d1 = c1.getTime();
+        String timed1=format.format(d1);     
+		String timeS = timed8 + "000000";
+		String timeE = timed1 + "235959";
+		inc.setStartDate1(timeS);
+		inc.setEndDate1(timeE);
+		Calendar c15 = Calendar.getInstance();
+		c15.setTime(new Date());
+		c15.add(Calendar.DATE, - 15); 
+		Date d15 = c15.getTime();
+        String timed15=format.format(d15); 
+        String timeS2 = timed15 + "000000";
+		String timeE2 = timed8 + "235959";
+		inc.setStartDate2(timeS2);
+		inc.setEndDate2(timeE2);
+		
+		List<IncreaseMoney> temp;  
+    	temp = skuMapper.increasebyuser(inc);
+    	IncreasePage increasePage = new IncreasePage();
+    	increasePage.setIncreasMoney(temp);
+    	tempnum = skuMapper.increasebyusernum(inc);
+    	increasePage.setTotalpage(tempnum/inc.getPagenum()+1); 
+    	
+    	return ResultUtil.success(increasePage);
+		
+    }
+    
+    
+    
+    
+    @Scheduled(cron = "0 10 11 ? * *" )
     @RequestMapping("wxpay/bosspay")
     public void bosspay() throws IOException {  
     	if(userMapper.bosspay() == 1){
@@ -337,7 +481,7 @@ public class WxPayController {
 		String timeE = timed + "235959";
 		order.setStartDate(timeS);
     	order.setEndDate(timeE);
-    	
+    	   
     	List<Shop> shop;
     	shop = shopMapper.query();
     	
@@ -346,7 +490,7 @@ public class WxPayController {
     		int fee = skuMapper.allmoney(order);       		
     		long now =  System.currentTimeMillis();  
     		String ms = now + "";
-    		String ccid = "f90524bd12ec53448f2cc7c178e757d07eb53772c2ab355b4d5c00abbcd36375";
+    		String ccid = "522b9d2ff03357ff0fd6eb7a2b18cdcc01182f74de0165a4b535ee743bc475bd";
     		String url = "https://store.lianlianchains.com/alloc/invoke?func=allocEarning&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + shop.get(i).getStoreId()
     				+ "&" + "slr=" + shop.get(i).getDeal() + "&"  + "pfm=" + shop.get(i).getDeal() + "&"  + "fld=" + shop.get(i).getField() + "&" + "dvy=" + shop.get(i).getSupply()
     				+ "&" + "tamt=" + Integer.toString(fee) + "&ak=" + ms ;
@@ -389,11 +533,15 @@ public class WxPayController {
     		WithDrawDay temp = new WithDrawDay();
     		temp.setFee(deal);
     		temp.setOpenid(shop.get(i).getDeal());
-    		temp.setTime(timed);
+    		Date nowtime = new Date();
+    		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    		temp.setTime(sdf.format(nowtime));
     		temp.setStoreid(shop.get(i).getStoreId());
     		temp.setState(0);
+    		temp.setRole("deal");
+    		temp.setStorename(shop.get(i).getStoreName());
     		String timevb = timed.toString();
-    		String descr = "日结算:" + timevb + shop.get(i).getStoreName() + "经营者";
+    		String descr = shop.get(i).getStoreName() + "经营者";
     		temp.setDescription(descr);
     		
     		
@@ -428,6 +576,8 @@ public class WxPayController {
     		jsonre.put("return_msg", returnInfo.getReturn_msg());
     		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
     		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+//    		descr = descr + "错误信息：" + returnInfo.getErr_code_des();
+    		temp.setErrmsg(returnInfo.getErr_code_des());
     		if (returnInfo.getResult_code().equals("SUCCESS")) {
     			temp.setState(1);		
             }
@@ -440,11 +590,14 @@ public class WxPayController {
     		temp = new WithDrawDay();
     		temp.setFee(supply);
     		temp.setOpenid(shop.get(i).getSupply());
-    		temp.setTime(timed);
+    		Date nowtime1 = new Date();
+    		temp.setTime(sdf.format(nowtime1));
     		temp.setStoreid(shop.get(i).getStoreId());
     		temp.setState(0);
     		timevb = timed.toString();
-    		descr = "日结算:" + timevb + shop.get(i).getStoreName() + "供货商";
+    		temp.setRole("supply");
+    		temp.setStorename(shop.get(i).getStoreName());
+    		descr =  shop.get(i).getStoreName() + "供货商";
     		temp.setDescription(descr);
     		   		
     		withDrawMapper.savewith(temp); 
@@ -452,7 +605,7 @@ public class WxPayController {
     		paternerKey="79m1jyaofjonvahln1wnoq606rvbk2gi";
     		parm = new HashMap<String, String>();
     		orderNo = RandomStringGenerator.getRandomStringByLength(32);
-    		feeS = Integer.toString(deal);
+    		feeS = Integer.toString(supply);
     		
     		parm.put("mch_appid", appid); //公众账号appid
     		parm.put("mchid", "1472139902"); //商户号
@@ -478,6 +631,8 @@ public class WxPayController {
     		jsonre.put("return_msg", returnInfo.getReturn_msg());
     		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
     		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+//    		descr = descr + "错误信息：" + returnInfo.getErr_code_des();
+    		temp.setErrmsg(returnInfo.getErr_code_des());
     		if (returnInfo.getResult_code().equals("SUCCESS")) {
     			temp.setState(1);		
             }
@@ -491,11 +646,14 @@ public class WxPayController {
     		temp = new WithDrawDay();
     		temp.setFee(field);
     		temp.setOpenid(shop.get(i).getField());
-    		temp.setTime(timed);
+    		Date nowtime2 = new Date();
+    		temp.setTime(sdf.format(nowtime2));
     		temp.setStoreid(shop.get(i).getStoreId());
     		temp.setState(0);
+    		temp.setRole("field");
+    		temp.setStorename(shop.get(i).getStoreName());
     		timevb = timed.toString();
-    		descr = "日结算:" + timevb + shop.get(i).getStoreName() + "场地";
+    		descr = shop.get(i).getStoreName() + "场地";
     		temp.setDescription(descr);
     		   		
     		withDrawMapper.savewith(temp); 
@@ -503,7 +661,7 @@ public class WxPayController {
     		paternerKey="79m1jyaofjonvahln1wnoq606rvbk2gi";
     		parm = new HashMap<String, String>();
     		orderNo = RandomStringGenerator.getRandomStringByLength(32);
-    		feeS = Integer.toString(deal);
+    		feeS = Integer.toString(field);
     		
     		parm.put("mch_appid", appid); //公众账号appid
     		parm.put("mchid", "1472139902"); //商户号
@@ -529,6 +687,8 @@ public class WxPayController {
     		jsonre.put("return_msg", returnInfo.getReturn_msg());
     		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
     		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+//    		descr = descr + "错误信息：" + returnInfo.getErr_code_des();
+    		temp.setErrmsg(returnInfo.getErr_code_des());
     		if (returnInfo.getResult_code().equals("SUCCESS")) {
     			temp.setState(1);		
             }
@@ -542,11 +702,14 @@ public class WxPayController {
     		temp = new WithDrawDay();
     		temp.setFee(plat);
     		temp.setOpenid(shop.get(i).getDeal());
-    		temp.setTime(timed);
+    		Date nowtime3 = new Date();
+    		temp.setTime(sdf.format(nowtime3));
     		temp.setStoreid(shop.get(i).getStoreId());
     		temp.setState(0);
+    		temp.setRole("platform");
+    		temp.setStorename(shop.get(i).getStoreName());
     		timevb = timed.toString();
-    		descr = "日结算:" + timevb + shop.get(i).getStoreName() + "平台";
+    		descr = shop.get(i).getStoreName() + "平台";
     		temp.setDescription(descr);
     		   		
     		withDrawMapper.savewith(temp); 
@@ -554,7 +717,7 @@ public class WxPayController {
     		paternerKey="79m1jyaofjonvahln1wnoq606rvbk2gi";
     		parm = new HashMap<String, String>();
     		orderNo = RandomStringGenerator.getRandomStringByLength(32);
-    		feeS = Integer.toString(deal);
+    		feeS = Integer.toString(plat);
     		
     		parm.put("mch_appid", appid); //公众账号appid
     		parm.put("mchid", "1472139902"); //商户号
@@ -580,6 +743,9 @@ public class WxPayController {
     		jsonre.put("return_msg", returnInfo.getReturn_msg());
     		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
     		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+ //   		descr = descr + "错误信息：" + returnInfo.getErr_code_des();
+    		temp.setErrmsg(returnInfo.getErr_code_des());
+    		temp.setDescription(descr);
     		if (returnInfo.getResult_code().equals("SUCCESS")) {
     			temp.setState(1);		
             }
@@ -621,6 +787,28 @@ public class WxPayController {
     	withdrawPage.setTotalpage(tempnum/order.getPagenum()+1); 
     	return ResultUtil.success(withdrawPage);
              	
+    }
+    
+
+    @RequestMapping("CVS/querywithusersum")
+    public Msg querywithusersum(WithDrawDay order) throws IOException {  	
+    	int tempnum = 0;  
+    	tempnum = withDrawMapper.querywithmansum(order);   	
+    	return ResultUtil.success(tempnum);
+    }
+    
+    @RequestMapping("CVS/querywithstoresum")
+    public Msg querywithstoresum(WithDrawDay order) throws IOException {  	
+    	int tempnum = 0;
+    	tempnum = order.getPage();
+    	order.setPage(tempnum*order.getPagenum());
+    	List<WithDrawDay> temp;  
+    	temp = withDrawMapper.querywithstoresum(order);
+    	WithdrawPage withdrawPage = new WithdrawPage();
+    	withdrawPage.setWithDrawDay(temp);
+    	tempnum = withDrawMapper.querywithstoresumnum(order);
+    	withdrawPage.setTotalpage(tempnum/order.getPagenum()+1); 
+    	return ResultUtil.success(withdrawPage);
     }
     
     @RequestMapping("wxpay/check")

@@ -19,23 +19,23 @@
 	</select>
 	
 	<insert id="savewith" parameterType="com.lxg.springboot.model.WithDrawDay">
-		insert into withdrawday(openid,fee,time,state,storeid,description)
-		values (#{openid},#{fee},#{time},#{state},#{storeid},#{description})
+		insert into withdrawday(openid,fee,time,state,storeid,description,role,storename)
+		values (#{openid},#{fee},#{time},#{state},#{storeid},#{description},#{role},#{storename})
 	</insert>
 	
 	<update id="updatewith" parameterType="com.lxg.springboot.model.WithDrawDay">
 		 update withdrawday 
-		 set state=#{state}
-		 where storeid=#{storeid} and time=#{time}
+		 set state=#{state},errmsg = #{errmsg}
+		 where storeid=#{storeid} and time=#{time} and role=#{role}
 	</update>
 	
 	<select id="querywithman" parameterType="com.lxg.springboot.model.WithDrawDay" resultType="com.lxg.springboot.model.WithDrawDay">
-		select * from withdrawday where openid=#{openid} ORDER BY time DESC
+		select *,fee/100 as feeformat from withdrawday where openid=#{openid} ORDER BY time DESC
 		limit #{page},#{pagenum}		
 	</select>
 	
 	<select id="querywithstore" parameterType="com.lxg.springboot.model.WithDrawDay" resultType="com.lxg.springboot.model.WithDrawDay">
-		select * from withdrawday 
+		select *,fee/100 as feeformat from withdrawday 
 		where openid=#{openid} and  storeid=#{storeid} ORDER BY time DESC
 		limit #{page},#{pagenum}
 	</select>
@@ -48,6 +48,19 @@
 	<select id="querywithstorenum" parameterType="com.lxg.springboot.model.WithDrawDay" resultType="int">
 		select count(*) from withdrawday 
 		where openid=#{openid} and  storeid=#{storeid}
+	</select>
+	
+	<select id="querywithmansum" parameterType="com.lxg.springboot.model.WithDrawDay" resultType="int">
+		select sum(fee) from withdrawday where openid=#{openid} 
+	</select>
+	
+	<select id="querywithstoresum" parameterType="com.lxg.springboot.model.WithDrawDay" resultType="com.lxg.springboot.model.WithDrawDay">
+		select sum(fee) as fee,storeid,storename from (select * from withdrawday where openid=#{openid}) as temp GROUP BY storeid  ORDER BY storeid DESC
+		limit #{page},#{pagenum}
+	</select>
+	
+	<select id="querywithstoresumnum" parameterType="com.lxg.springboot.model.WithDrawDay" resultType="int">
+		select count(*) from(select * from (select * from withdrawday where openid=#{openid}) as temp GROUP BY storeid) as temp1
 	</select>
 	
 </mapper>  
