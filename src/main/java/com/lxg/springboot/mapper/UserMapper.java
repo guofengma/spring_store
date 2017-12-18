@@ -2,6 +2,7 @@ package com.lxg.springboot.mapper;
 
 import java.util.List;
 
+import com.lxg.springboot.model.Finance;
 import com.lxg.springboot.model.Score;
 import com.lxg.springboot.model.Union;
 import com.lxg.springboot.model.User;
@@ -43,4 +44,8 @@ public interface UserMapper {
 	void saveunion(Union union);
 	
 	String getunionid(String openid);
+	
+	void savefinance(Finance user);
+	
+	void deletefinance(Finance user);
 }

@@ -24,6 +24,10 @@ public class IncreaseMoney extends BasicObject {
 	
 	private String storename;
 	
+	private int score;
+	
+	private int scorebonus;
+	
 	private int page;
 	
 	private int pagenum;
@@ -98,6 +102,22 @@ public class IncreaseMoney extends BasicObject {
 
 	public void setStorename(String storename) {
 		this.storename = storename;
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+
+	public int getScorebonus() {
+		return scorebonus;
+	}
+
+	public void setScorebonus(int scorebonus) {
+		this.scorebonus = scorebonus;
 	}
 
 }

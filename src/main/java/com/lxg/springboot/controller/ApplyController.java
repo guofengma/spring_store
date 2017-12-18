@@ -559,7 +559,7 @@ public class ApplyController extends BaseController {
 
 		Token token = JSON.parseObject(httpAPIService.doGet(urltoken), Token.class);
 
-		String url = "https://api.weixin.qq.com/wxa/getwxacode?access_token="
+		String url = "https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode?access_token="
 				+ token.getAccess_token();
 
 		// 参数

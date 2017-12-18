@@ -19,10 +19,42 @@
 	</select>
 	
 	<insert id="savewith" parameterType="com.lxg.springboot.model.WithDrawDay">
-		insert into withdrawday(openid,fee,time,state,storeid,description,role,storename)
-		values (#{openid},#{fee},#{time},#{state},#{storeid},#{description},#{role},#{storename})
+		insert into withdrawday(openid,fee,time,state,storeid,description,role,storename,name)
+		values (#{openid},#{fee},#{time},#{state},#{storeid},#{description},#{role},#{storename},#{name})
 	</insert>
 	
+	<insert id="saveerror" parameterType="com.lxg.springboot.model.WithDrawDay">
+		insert into withdrawerror(openid,fee,time,state,name)
+		values (#{openid},#{fee},#{time},#{state},#{name})
+	</insert>
+	
+	<select id="queryerror" parameterType="com.lxg.springboot.model.WithDrawDay" resultType="com.lxg.springboot.model.WithDrawDay">
+		select openid,sum(fee) as fee,time,state,storeid,storename,name from (select * FROM withdrawday where state='2'
+		<if test="startDate != null and startDate != ''">
+    		and time &gt;= #{startDate}
+    	</if> 
+    	<if test="endDate != null and endDate != ''">
+    		and time &lt;= #{endDate}
+    	</if>
+    	) as temp GROUP BY openid
+	</select>
+	
+	<select id="queryerrortime" parameterType="com.lxg.springboot.model.WithDrawDay" resultType="com.lxg.springboot.model.WithDrawDay">
+		select * from withdrawerror where time &gt;= #{startDate} and time &lt;= #{endDate} and openid=#{openid}
+	</select>
+	
+	<update id="updateerrorfee" parameterType="com.lxg.springboot.model.WithDrawDay">
+		 update withdrawerror 
+		 set fee=#{fee}
+		 where storeid=#{storeid} and time=#{time} and openid=#{openid}
+	</update>
+	
+	<update id="updateerrorstate" parameterType="com.lxg.springboot.model.WithDrawDay">
+		 update withdrawerror 
+		 set state=#{state}
+		 where storeid=#{storeid} and time=#{time} and openid=#{openid}
+	</update>
+		
 	<update id="updatewith" parameterType="com.lxg.springboot.model.WithDrawDay">
 		 update withdrawday 
 		 set state=#{state},errmsg = #{errmsg}

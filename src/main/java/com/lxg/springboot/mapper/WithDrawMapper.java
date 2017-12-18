@@ -17,6 +17,16 @@ public interface WithDrawMapper {
 	
 	int updatewith(WithDrawDay order);
 	
+	List<WithDrawDay> queryerror(WithDrawDay order);
+	
+	int saveerror(WithDrawDay order);
+	
+	int updateerrorfee(WithDrawDay order);
+	
+	int updateerrorstate(WithDrawDay order);
+	
+	List<WithDrawDay> queryerrortime(WithDrawDay order);
+	
 	List<WithDrawDay> querywithman(WithDrawDay order);
 	
 	List<WithDrawDay> querywithstore(WithDrawDay order);

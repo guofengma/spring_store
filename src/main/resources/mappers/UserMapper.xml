@@ -93,5 +93,14 @@
 		select unionid from unionopen
 		where openid=#{openid} 
 	</select>
+	
+	<insert id="savefinance" parameterType="com.lxg.springboot.model.Finance">
+		insert into finance(openid,storeid,score)
+		values (#{openid},#{storeid},#{score})
+	</insert>	
+	
+	<update id="deletefinance" parameterType="com.lxg.springboot.model.Finance">
+		delete from finance where openid=#{openid} and  storeid=#{storeid}
+	</update>
 
 </mapper>  

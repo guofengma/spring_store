@@ -2,8 +2,12 @@ package com.lxg.springboot.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.lxg.springboot.mapper.UserMapper;
+import com.lxg.springboot.model.Finance;
+import com.lxg.springboot.model.Msg;
 import com.lxg.springboot.model.Result;
+import com.lxg.springboot.model.ResultUtil;
 import com.lxg.springboot.model.User;
+import com.lxg.springboot.service.HttpAPIService;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +26,8 @@ public class UserController extends BaseController {
 	
 	@Resource
     private UserMapper userMapper;
+	@Resource
+    private HttpAPIService httpAPIService;
 
     @RequestMapping("save")
     public Result save(User user) {
@@ -86,4 +92,63 @@ public class UserController extends BaseController {
     		return jsonA.toJSONString();
     	}
     }    
+    
+    @RequestMapping("joinfinance")
+    public Msg joinfinance(Finance finance) {
+    	
+    	userMapper.savefinance(finance);
+    	
+    	String userunion = userMapper.getunionid(finance.getOpenid());
+    	User tempuser = new User();
+		tempuser.setStoreid(finance.getStoreid());
+		User Boss=userMapper.querybossbyid(tempuser);
+		String bossunion = userMapper.getunionid(Boss.getOpenid());
+		
+		String ccid = "292bed8e86bc425bbd9351d6af4ed51bd80c40a00633843cf63028498837e178";
+		String urla ="";
+		String res="";
+		
+		urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&" + "reacc=" + bossunion  +  "&" + "amt=" + finance.getScore()+ "&tstp=积分理财投资&desc=积分理财投资" ;
+		
+		res = null;
+		
+		try {
+			res = httpAPIService.doGet(urla);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	
+    	return ResultUtil.success();
+    }  
+    
+    @RequestMapping("deletefinance")
+    public Msg deletefinance(Finance finance) {
+    	
+    	userMapper.deletefinance(finance);
+    	
+    	String userunion = userMapper.getunionid(finance.getOpenid());
+    	User tempuser = new User();
+		tempuser.setStoreid(finance.getStoreid());
+		User Boss=userMapper.querybossbyid(tempuser);
+		String bossunion = userMapper.getunionid(Boss.getOpenid());
+		
+		String ccid = "292bed8e86bc425bbd9351d6af4ed51bd80c40a00633843cf63028498837e178";
+		String urla ="";
+		String res="";
+		
+		urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + bossunion	+ "&" + "acc=" + bossunion + "&" + "reacc=" + userunion +  "&" + "amt=" + finance.getScore() + "&tstp=积分理财提取&desc=积分理财提取" ;
+		
+		res = null;
+		
+		try {
+			res = httpAPIService.doGet(urla);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+    	return ResultUtil.success();
+    } 
 }

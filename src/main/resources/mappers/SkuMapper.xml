@@ -165,6 +165,44 @@
 	    	</if>
 		GROUP BY storeid) as temp2 )where temp1.storeid1=temp2.storeid2	) as temp3 JOIN apply where temp3.storeid = apply.id) as temp4 where field= #{openid} or deal= #{openid} or supply= #{openid}
 	</select>
-		
-		
+	
+	<select id="increasebyuserjoin" parameterType="com.lxg.springboot.model.IncreaseMoney" resultType="com.lxg.springboot.model.IncreaseMoney">
+		SELECT finalincrease,storename,score,storeid from(SELECT * from (SELECT round((thisweek/lastweek*100 -100),2) as finalincrease,storeid1 as storeid  from (SELECT sum(fee*100) as thisweek,storeid as storeid1 from  orders where state='1'
+	    	<if test="startDate1 != null and startDate1 != ''">
+    		and time &gt;= #{startDate1}
+    		</if> 
+    		<if test="endDate1 != null and endDate1 != ''">
+    		and time &lt;= #{endDate1}
+    		</if>
+		GROUP BY storeid) as temp1 join (
+		(SELECT sum(fee*100) as lastweek,storeid as storeid2 from  orders where state='1'
+	    	<if test="startDate2 != null and startDate2 != ''">
+	    	and time &gt;= #{startDate2}
+	    	</if> 
+	    	<if test="endDate2 != null and endDate2 != ''">
+	    	and time &lt;= #{endDate2}
+	    	</if>
+			GROUP BY storeid) as temp2 )where temp1.storeid1=temp2.storeid2	) as temp3 JOIN apply where temp3.storeid = apply.id) as temp4 join (SELECT storeid as storeid1,score from finance WHERE openid=#{openid}) as temp5 WHERE temp4.storeid = temp5.storeid1
+			limit #{page},#{pagenum}
+	</select>
+	
+	<select id="increasebyuserjoinnum" parameterType="com.lxg.springboot.model.IncreaseMoney" resultType="int">
+		SELECT count(storename) from(SELECT * from (SELECT round((thisweek/lastweek*100 -100),2) as finalincrease,storeid1 as storeid  from (SELECT sum(fee*100) as thisweek,storeid as storeid1 from  orders where state='1'
+	    	<if test="startDate1 != null and startDate1 != ''">
+    		and time &gt;= #{startDate1}
+    		</if> 
+    		<if test="endDate1 != null and endDate1 != ''">
+    		and time &lt;= #{endDate1}
+    		</if>
+		GROUP BY storeid) as temp1 join (
+		(SELECT sum(fee*100) as lastweek,storeid as storeid2 from  orders where state='1'
+	    	<if test="startDate2 != null and startDate2 != ''">
+	    	and time &gt;= #{startDate2}
+	    	</if> 
+	    	<if test="endDate2 != null and endDate2 != ''">
+	    	and time &lt;= #{endDate2}
+	    	</if>
+		GROUP BY storeid) as temp2 )where temp1.storeid1=temp2.storeid2	) as temp3 JOIN apply where temp3.storeid = apply.id) as temp4 join (SELECT * from finance WHERE openid=#{openid}) as temp5 WHERE temp4.storeid = temp5.storeid
+	</select>
+				
 </mapper>  

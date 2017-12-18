@@ -19,6 +19,8 @@ public class WithDrawDay {
 	
 	private String role;
 	
+	private String name;
+	
 	private String errmsg;
 	
 	private int page;
@@ -26,6 +28,10 @@ public class WithDrawDay {
 	private int pagenum;
 	
 	private double feeformat;
+	
+	private String startDate;
+	
+	private String endDate;
 
 
 	public String getOpenid() {
@@ -122,6 +128,30 @@ public class WithDrawDay {
 
 	public void setErrmsg(String errmsg) {
 		this.errmsg = errmsg;
+	}
+
+	public String getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 

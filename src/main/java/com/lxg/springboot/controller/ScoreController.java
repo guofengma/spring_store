@@ -82,7 +82,8 @@ public class ScoreController extends BaseController {
 	    
 	    @RequestMapping("query")
 	    public Msg query(String unionId) {
-	    	
+	    	System.out.println("企业支付结果：" + unionId);
+			
 
 	    	String ccid = "292bed8e86bc425bbd9351d6af4ed51bd80c40a00633843cf63028498837e178";
 			String urla = "https://store.lianlianchains.com/kd/query?func=getBalance&" + "ccId=" + ccid + "&" + "usr=" + unionId	+ "&" + "acc=" + unionId;
@@ -95,6 +96,8 @@ public class ScoreController extends BaseController {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			System.out.println("企业支付结果：" + res);
 			
 			JSONObject json = JSON.parseObject(res);  
 			String resc = json.getString("code");

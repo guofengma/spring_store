@@ -44,7 +44,11 @@ public interface SkuMapper {
 	
 	int increasebyusernum(IncreaseMoney increasem);
 	
+	int increasebyuserjoinnum(IncreaseMoney increasem);
+	
 	List<IncreaseMoney> increaseall(IncreaseMoney increasem);
 	
 	List<IncreaseMoney> increasebyuser(IncreaseMoney increasem);
+	
+	List<IncreaseMoney> increasebyuserjoin(IncreaseMoney increasem);
 }
