@@ -40,4 +40,6 @@ public interface WithDrawMapper {
 	List<WithDrawDay> querywithstoresum(WithDrawDay order);
 	
 	int querywithstoresumnum(WithDrawDay order);
+	
+	List<WithDrawDay> queryallerrortime(WithDrawDay order);
 }

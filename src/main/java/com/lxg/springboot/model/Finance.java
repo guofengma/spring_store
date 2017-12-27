@@ -12,6 +12,8 @@ public class Finance {
 	private int pagenum;
 	
 	private int score;
+	
+	private String time;
 
 	public String getOpenid() {
 		return openid;
@@ -51,6 +53,14 @@ public class Finance {
 
 	public void setScore(int score) {
 		this.score = score;
+	}
+
+	public String getTime() {
+		return time;
+	}
+
+	public void setTime(String time) {
+		this.time = time;
 	}
 
 }

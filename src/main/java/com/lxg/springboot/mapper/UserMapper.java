@@ -48,4 +48,10 @@ public interface UserMapper {
 	void savefinance(Finance user);
 	
 	void deletefinance(Finance user);
+	
+	int queryfinancecount(Finance user);
+	
+	Finance queryfinancebyid(Finance user);
+	
+	void updatefinance(Finance user);
 }

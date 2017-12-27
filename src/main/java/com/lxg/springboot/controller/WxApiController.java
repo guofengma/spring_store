@@ -3,6 +3,8 @@ package com.lxg.springboot.controller;
 import com.lxg.springboot.mapper.ShopMapper;
 import com.lxg.springboot.mapper.UserMapper;
 import com.lxg.springboot.model.HttpResult;
+import com.lxg.springboot.model.Msg;
+import com.lxg.springboot.model.ResultUtil;
 import com.lxg.springboot.model.Shop;
 import com.lxg.springboot.model.Token;
 import com.lxg.springboot.model.Union;
@@ -90,48 +92,7 @@ public class WxApiController {
                 userInfo.put("unionId", userInfoJSON.get("unionId"));
                 map.put("userInfo", userInfo);
                 String unionId = userInfoJSON.getString("unionId");
-                Union union = new Union();
-                union.setOpenid(openid);
-                union.setUnionid(unionId);
-                try{
-                userMapper.saveunion(union);
-                }
-                catch(Exception e) {
-                    e.printStackTrace();
-                }
-                String ccid = "292bed8e86bc425bbd9351d6af4ed51bd80c40a00633843cf63028498837e178";
-                String urla = "https://store.lianlianchains.com/kd/query?func=isAccExists&ccId=" + ccid + "&" + "usr=" + unionId + "&" + "acc=" + unionId;
                 
-                String resa = null;
-                try
-                {
-                  resa = this.httpAPIService.doGet(urla);
-                }
-                catch (Exception e)
-                {
-                  e.printStackTrace();
-                }
-                com.alibaba.fastjson.JSONObject json = JSON.parseObject(resa);
-                String resc = json.getString("code");
-                if (resc.equals("0"))
-                {
-                  String flag = json.getString("result");
-                  if (!flag.equals("1"))
-                  {
-                    urla = "https://store.lianlianchains.com/kd/register?func=account&ccId=" + ccid + "&" + "usr=" + unionId + "&" + "acc=" + unionId;
-                    resa = null;
-                    try
-                    {
-                      resa = this.httpAPIService.doGet(urla);
-                    }
-                    catch (Exception e)
-                    {
-                      e.printStackTrace();
-                    }
-                    json = JSON.parseObject(resa);
-                    resc = json.getString("code");
-                  }
-                }
                 return map;
             }
         } catch (Exception e) {
@@ -141,6 +102,58 @@ public class WxApiController {
         map.put("msg", "解密失败");
         return map;
     }
+    
+    
+    
+	@RequestMapping("wx/account")
+	public Msg account(String openid,String unionId) throws Exception {
+		Union union = new Union();
+        union.setOpenid(openid);
+        union.setUnionid(unionId);
+        try{
+        userMapper.saveunion(union);
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }            
+
+        String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
+        String urla = "https://store.lianlianchains.com/kd/query?func=isAccExists&ccId=" + ccid + "&" + "usr=" + unionId + "&" + "acc=" + unionId;
+        
+        String resa = null;
+        try
+        {
+          resa = this.httpAPIService.doGet(urla);
+        }
+        catch (Exception e)
+        {
+          e.printStackTrace();
+        }
+        com.alibaba.fastjson.JSONObject json = JSON.parseObject(resa);
+        String resc = json.getString("code");
+        if (resc.equals("0"))
+        {
+          String flag = json.getString("result");
+          if (!flag.equals("1"))
+          {
+            urla = "https://store.lianlianchains.com/kd/register?func=account&ccId=" + ccid + "&" + "usr=" + unionId + "&" + "acc=" + unionId;
+            resa = null;
+            try
+            {
+              resa = this.httpAPIService.doGet(urla);
+            }
+            catch (Exception e)
+            {
+              e.printStackTrace();
+            }
+            json = JSON.parseObject(resa);
+            resc = json.getString("code");
+          }
+        }
+        
+		return ResultUtil.success();
+
+	}
 	
 	@RequestMapping("wx/getUnionID")
 	public String getUnionID(String code,String token) throws Exception {

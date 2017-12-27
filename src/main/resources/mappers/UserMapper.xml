@@ -95,12 +95,28 @@
 	</select>
 	
 	<insert id="savefinance" parameterType="com.lxg.springboot.model.Finance">
-		insert into finance(openid,storeid,score)
-		values (#{openid},#{storeid},#{score})
+		insert into finance(openid,storeid,score,time)
+		values (#{openid},#{storeid},#{score},#{time})
 	</insert>	
+	
+	<select id="queryfinancecount" parameterType="com.lxg.springboot.model.Finance" resultType="int">
+		select count(*) from finance
+		 where openid=#{openid} and  storeid=#{storeid} 
+	</select>
+	
+	<select id="queryfinancebyid" parameterType="com.lxg.springboot.model.Finance" resultType="com.lxg.springboot.model.Finance">
+		select openid,storeid,sum(score) as score,time from (select * from finance
+		 where openid=#{openid} and  storeid=#{storeid} ) as temp
+	</select>
 	
 	<update id="deletefinance" parameterType="com.lxg.springboot.model.Finance">
 		delete from finance where openid=#{openid} and  storeid=#{storeid}
+	</update>
+	
+	<update id="updatefinance" parameterType="com.lxg.springboot.model.Finance">
+		 update finance 
+		 set score=#{score}
+		 where openid=#{openid} and  storeid=#{storeid}
 	</update>
 
 </mapper>  

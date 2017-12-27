@@ -85,7 +85,7 @@ public class ScoreController extends BaseController {
 	    	System.out.println("企业支付结果：" + unionId);
 			
 
-	    	String ccid = "292bed8e86bc425bbd9351d6af4ed51bd80c40a00633843cf63028498837e178";
+	    	String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
 			String urla = "https://store.lianlianchains.com/kd/query?func=getBalance&" + "ccId=" + ccid + "&" + "usr=" + unionId	+ "&" + "acc=" + unionId;
 			
 			String res = null;
@@ -113,7 +113,7 @@ public class ScoreController extends BaseController {
 	    public Msg querydetail(String unionId ,int start ,int pagenum) {
 	    	
 
-	    	String ccid = "292bed8e86bc425bbd9351d6af4ed51bd80c40a00633843cf63028498837e178";
+	    	String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
 			String urla = "https://store.lianlianchains.com/kd/query?func=getTransInfo&" + "ccId=" + ccid + "&" + "usr=" + unionId	+ "&" + "acc=" + unionId + "&" + "qacc=" + unionId	+ "&" + "bsq=" + start + "&" + "cnt=" + pagenum;
 			
 			String res = null;

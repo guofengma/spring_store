@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.lxg.springboot.mapper.ApplyMapper;
 import com.lxg.springboot.mapper.FieldMapper;
 import com.lxg.springboot.mapper.ShopMapper;
+import com.lxg.springboot.mapper.SkuMapper;
 import com.lxg.springboot.mapper.UserMapper;
 import com.lxg.springboot.model.Apply;
 import com.lxg.springboot.model.ApplyIf;
@@ -12,6 +13,7 @@ import com.lxg.springboot.model.Applypage;
 import com.lxg.springboot.model.Field;
 import com.lxg.springboot.model.Msg;
 import com.lxg.springboot.model.Order;
+import com.lxg.springboot.model.OrderAll;
 import com.lxg.springboot.model.Result;
 import com.lxg.springboot.model.ResultUtil;
 import com.lxg.springboot.model.Shop;
@@ -30,10 +32,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.print.DocFlavor.STRING;
 import javax.servlet.http.HttpServletResponse;
 
 
@@ -41,6 +48,10 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("CVS/apply/")
 public class ApplyController extends BaseController {
 	
+	
+
+	@Resource
+    private SkuMapper skuMapper;
 	@Resource
     private ApplyMapper applyMapper;
 	@Resource
@@ -534,8 +545,8 @@ public class ApplyController extends BaseController {
     	user.setRole("boss");
     	userMapper.saveboss(user);
     	
-    	String ccid = "522b9d2ff03357ff0fd6eb7a2b18cdcc01182f74de0165a4b535ee743bc475bd";
-		String urla = "https://store.lianlianchains.com/alloc/invoke?func=setAllocCfg&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + id
+    	String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
+		String urla = "https://store.lianlianchains.com/kd/invoke?func=setAllocCfg&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + id
 				+ "&" + "slr=" + apply.getDealper() + "&"  + "pfm=" + apply.getPlatper() + "&"  + "fld=" + apply.getFieldper() + "&" + "dvy=" + apply.getSupplyper();
 		
 		String res = null;
@@ -549,6 +560,29 @@ public class ApplyController extends BaseController {
 		
 		JSONObject json = JSON.parseObject(res);  
 		String resc = json.getString("code");
+		
+		if (!resc.equals("0")){
+			return ResultUtil.fail("区块链连接错误");
+		}		
+		
+		String fieldunion = userMapper.getunionid(shop.getField());		
+		String dealunion = userMapper.getunionid(shop.getDeal());		
+		String supplyunion = userMapper.getunionid(shop.getSupply());		
+		String platform = "o57KOvxS0eXTtxv23EobCON__S40";
+		
+		urla = "https://store.lianlianchains.com/kd/invoke?func=encourageScoreForNewRack&" + "ccId=" + ccid + "&" + "usr=kdcoinpool&acc=kdcoinpool&desc=新货架奖励积分&cfg=" + shop.getStoreId()+ ","+dealunion+ ","+fieldunion+ ","+supplyunion+ ","+platform;
+		
+		res = null;
+		
+		try {
+			res = httpAPIService.doGet(urla);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		json = JSON.parseObject(res);  
+		resc = json.getString("code");
 		
 		if (!resc.equals("0")){
 			return ResultUtil.fail("区块链连接错误");
@@ -634,5 +668,69 @@ public class ApplyController extends BaseController {
     	
     	return ResultUtil.success(retshop);
     }
+    
+    @RequestMapping("income")
+    public Msg income() throws Exception {
+    	
+    	List<Shop> shop;
+    	shop= shopMapper.query();
+    	String temp = "";
+    	String fieldunion= "";
+    	String dealunion= "";
+    	String supplyunion= "";
+    	String platform = "o57KOvxS0eXTtxv23EobCON__S40";
+    	
+    	for(int i=0;i<shop.size();i++){
+    		if(!temp.equals("")){
+    			temp = temp + ";";
+    		}
+    		fieldunion = userMapper.getunionid(shop.get(i).getField());		
+    		dealunion = userMapper.getunionid(shop.get(i).getDeal());		
+    		supplyunion = userMapper.getunionid(shop.get(i).getSupply());		
+    		
+    		Calendar c = Calendar.getInstance();
+        	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
+        	c.setTime(new Date());
+        	c.add(Calendar.MONTH, -1);
+            Date d = c.getTime();
+            String timed=format.format(d);       
+        	List<OrderAll> allOrder; 
+        	Date date=new Date();
+        	Order order = new Order();
+    		String time=format.format(date);
+    		String timeS = timed + "000000";
+    		String timeE = time + "235959";
+        	order.setStartDate(timeS);
+        	order.setEndDate(timeE);
+        	order.setStoreid(shop.get(i).getStoreId());
+        	int fee=skuMapper.allmoney(order);
+        	temp = temp + shop.get(i).getStoreId()+","+ fee + "," +dealunion+ ","+fieldunion+ ","+supplyunion+ ","+platform;
+    		}
+        	String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
+        	String urla = "https://store.lianlianchains.com/kd/invoke?func=encourageScoreForSales&" + "ccId=" + ccid + "&" + "usr=kdcoinpool&acc=kdcoinpool&desc=月度奖励积分&cfg="+ temp;
+    		
+    		String res = null;
+    		
+    		try {
+    			res = httpAPIService.doGet(urla);
+    		} catch (Exception e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+    		
+    		JSONObject json = JSON.parseObject(res);  
+    		String resc = json.getString("code");
+    		
+    		if (!resc.equals("0")){
+    			return ResultUtil.fail("区块链连接错误");
+    		}		
+    	
+    	
+    	return ResultUtil.success();
+    	
+    	
+   
+    }
+    	
     
 }

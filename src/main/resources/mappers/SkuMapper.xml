@@ -81,7 +81,7 @@
 	
 	
 	<select id="allmoney" parameterType="com.lxg.springboot.model.Order" resultType="int">
-	SELECT sum(fee*100) from  orders where state='1' and orders.storeid=#{storeid}
+	SELECT  ifnull(sum(fee*100),0) from  orders where state='1' and orders.storeid=#{storeid}
 		<if test="startDate != null and startDate != ''">
     	and orders.time &gt;= #{startDate}
     	</if> 
@@ -182,7 +182,7 @@
 	    	<if test="endDate2 != null and endDate2 != ''">
 	    	and time &lt;= #{endDate2}
 	    	</if>
-			GROUP BY storeid) as temp2 )where temp1.storeid1=temp2.storeid2	) as temp3 JOIN apply where temp3.storeid = apply.id) as temp4 join (SELECT storeid as storeid1,score from finance WHERE openid=#{openid}) as temp5 WHERE temp4.storeid = temp5.storeid1
+			GROUP BY storeid) as temp2 )where temp1.storeid1=temp2.storeid2	) as temp3 JOIN apply where temp3.storeid = apply.id) as temp4 join (SELECT * from (SELECT openid,storeid as storeid1,sum(score) as score from finance GROUP BY storeid,openid) as wtf where openid=#{openid}) as temp5 WHERE temp4.storeid = temp5.storeid1
 			limit #{page},#{pagenum}
 	</select>
 	
@@ -202,7 +202,7 @@
 	    	<if test="endDate2 != null and endDate2 != ''">
 	    	and time &lt;= #{endDate2}
 	    	</if>
-		GROUP BY storeid) as temp2 )where temp1.storeid1=temp2.storeid2	) as temp3 JOIN apply where temp3.storeid = apply.id) as temp4 join (SELECT * from finance WHERE openid=#{openid}) as temp5 WHERE temp4.storeid = temp5.storeid
+		GROUP BY storeid) as temp2 )where temp1.storeid1=temp2.storeid2	) as temp3 JOIN apply where temp3.storeid = apply.id) as temp4 join (SELECT * from (SELECT openid,storeid,sum(score) as score from finance GROUP BY storeid,openid) as wtf where openid=#{openid}) as temp5 WHERE temp4.storeid = temp5.storeid
 	</select>
 				
 </mapper>  

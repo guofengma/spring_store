@@ -185,32 +185,12 @@ public class WxPayController {
 		tempuser.setStoreid(Order.getStoreid());
 		User Boss=userMapper.querybossbyid(tempuser);
 		String bossunion = userMapper.getunionid(Boss.getOpenid());
-		String ccid = "292bed8e86bc425bbd9351d6af4ed51bd80c40a00633843cf63028498837e178";
+		String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
 		String urla ="";
 		String res="";
-				
-		if(Order.getUsedScore() > 0){
 			
-	    	
-			urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&" + "reacc=" + bossunion +  "&" + "amt=" + Order.getUsedScore() + "&tstp=消费抵扣积分&desc=''" ;
-			
-			res = null;
-			
-			try {
-				res = httpAPIService.doGet(urla);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			JSONObject json2 = JSON.parseObject(res);  
-			String resc = json2.getString("code");
-			
-			if (!resc.equals("0")){
-				return "区块链连接错误";
-			}	
-			
-		}
+		
+		
 		
 		
 		
@@ -270,7 +250,9 @@ public class WxPayController {
         Order.setOrderNo(map.get("out_trade_no"));
         Order tempOrder = new Order();
         tempOrder = orderMapper.querybyno(Order);
-        String openid = Order.getOpenid();
+        String openid = tempOrder.getOpenid();
+        int score = tempOrder.getUsedScore();
+      
         if(tempOrder.getState()!=1){        	
         if (map.get("result_code").equals("SUCCESS")) {      	
         	Order.setState(1);
@@ -333,7 +315,7 @@ public class WxPayController {
     		String userunion = userMapper.getunionid(openid);
     		tempuser.setStoreid(Order.getStoreid());
     		String bossunion = userMapper.getunionid(Boss.getOpenid());
-    		String ccid = "292bed8e86bc425bbd9351d6af4ed51bd80c40a00633843cf63028498837e178";
+    		String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
     		String urla ="";
     		String res="";
     		
@@ -351,6 +333,24 @@ public class WxPayController {
     		JSONObject json1 = JSON.parseObject(res);  
     		String resc1 = json1.getString("code");
     		
+    		if(score > 0){
+    			
+    	    	
+    			urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&" + "reacc=" + bossunion +  "&" + "amt=" + score + "&tstp=消费抵扣积分&desc=消费抵扣积分" ;
+    			
+    			res = null;
+    			
+    			try {
+    				res = httpAPIService.doGet(urla);
+    			} catch (Exception e) {
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    			}
+    			
+    			JSONObject json2 = JSON.parseObject(res);  
+    			String resc2 = json2.getString("code");
+    			
+    		}
     		
     		if(userMapper.bosspay()== 0){
     		HttpResult result2 = HttpUtils.posts("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", XmlUtil.xmlFormat(parm, false));
@@ -494,7 +494,6 @@ public class WxPayController {
 		
 		List<IncreaseMoney> temp;  
     	temp = skuMapper.increasebyuserjoin(inc);
-    	temp.get(0).setScorebonus(2);
     	IncreasePage increasePage = new IncreasePage();
     	increasePage.setIncreasMoney(temp);
     	tempnum = skuMapper.increasebyuserjoinnum(inc);
@@ -521,13 +520,13 @@ public class WxPayController {
     		String timeyes = sdf.format(yest); 
     		String timelastyes=sdf.format(lastyes); 
     		WithDrawDay temp = new WithDrawDay();
-    		temp.setStartDate(timeyes);
-    		temp.setEndDate(timenow);
+    		temp.setStartDate(timenow.substring(0,11)+"00:00:00");
+    		temp.setEndDate(timenow.substring(0,11)+"23:59:59");
     		
     		List<WithDrawDay> errorlist; 
     		List<WithDrawDay> templist; 
     		
-    		errorlist = withDrawMapper.queryerror(temp);
+    		errorlist = withDrawMapper.queryallerrortime(temp);
     		String openid = "";
     		int tempfee;
     		WithDrawDay error = new WithDrawDay();
@@ -536,11 +535,14 @@ public class WxPayController {
     			temp.setOpenid(openid);
     			temp.setStartDate(timeyes.substring(0,11)+"00:00:00");
     			temp.setEndDate(timeyes.substring(0,11)+"23:59:59");
+    			temp.setRole(errorlist.get(i).getRole());
+    			temp.setOpenid(errorlist.get(i).getOpenid());
+    			temp.setStoreid(errorlist.get(i).getStoreid());
     			templist = withDrawMapper.queryerrortime(temp);
     			if(templist.size()!=0){
-    				error=templist.get(0);
-    				if(error.getState()==2){
-    					tempfee = error.getFee() + errorlist.get(i).getFee();
+    				if( templist.get(0).getState()==2){
+    					error = errorlist.get(i);
+    					tempfee = error.getFee() + templist.get(0).getFee();
     					error.setFee(tempfee);
     				}
     				else{
@@ -565,7 +567,7 @@ public class WxPayController {
     		    		parm.put("check_name", "FORCE_CHECK"); //校验用户姓名选项 OPTION_CHECK
     		    		parm.put("re_user_name",error.getName()); //check_name设置为FORCE_CHECK或OPTION_CHECK，则必填
     		    		parm.put("amount", feeS); //转账金额
-    		    		parm.put("desc", "快点补款"); //企业付款描述信息		
+    		    		parm.put("desc", error.getDescription()); //企业付款描述信息		
     		    		parm.put("spbill_create_ip", InetAddress.getLocalHost().getHostAddress());
     		    		parm.put("sign", PayUtil.getSign(parm, paternerKey));
     		    		
@@ -584,14 +586,17 @@ public class WxPayController {
 //    		    		descr = descr + "错误信息：" + returnInfo.getErr_code_des();
     		    		temp.setErrmsg(returnInfo.getErr_code_des());
     		    		if (returnInfo.getResult_code().equals("SUCCESS")) {
-    		    			error.setState(1);		
+    		    			error.setState(1);	
+    		    			error.setErrmsg("");
+    		    			withDrawMapper.updatewith(error);
     		            }
     		            else{
     		            	error.setState(2);
+    		            	error.setTime(timenow);
+        		    		withDrawMapper.saveerror(error);
     		            }
     		    		
-    		    		error.setTime(timenow);
-    		    		withDrawMapper.saveerror(error);
+    		    		
     			
     		}
     		
@@ -632,8 +637,8 @@ public class WxPayController {
     		if (fee!=0){
     		long now =  System.currentTimeMillis();  
     		String ms = now + "";
-    		String ccid = "522b9d2ff03357ff0fd6eb7a2b18cdcc01182f74de0165a4b535ee743bc475bd";
-    		String url = "https://store.lianlianchains.com/alloc/invoke?func=allocEarning&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + shop.get(i).getStoreId()
+    		String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
+    		String url = "https://store.lianlianchains.com/kd/invoke?func=allocEarning&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + shop.get(i).getStoreId()
     				+ "&" + "slr=" + shop.get(i).getDeal() + "&"  + "pfm=" + shop.get(i).getDeal() + "&"  + "fld=" + shop.get(i).getField() + "&" + "dvy=" + shop.get(i).getSupply()
     				+ "&" + "tamt=" + Integer.toString(fee) + "&ak=" + ms ;
 
@@ -647,7 +652,7 @@ public class WxPayController {
     		JSONObject json = JSON.parseObject(res);  
     		String resc = json.getString("code");
     		if (resc.equals("0")){
-    			url = "https://store.lianlianchains.com/alloc/query?func=queryRackAlloc&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + shop.get(i).getStoreId()
+    			url = "https://store.lianlianchains.com/kd/query?func=queryRackAlloc&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + shop.get(i).getStoreId()
         			 + "&ak=" + ms ;
     		try {
 				res = httpAPIService.doGet(url);

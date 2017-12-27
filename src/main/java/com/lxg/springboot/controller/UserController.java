@@ -12,6 +12,10 @@ import com.lxg.springboot.service.HttpAPIService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -96,7 +100,12 @@ public class UserController extends BaseController {
     @RequestMapping("joinfinance")
     public Msg joinfinance(Finance finance) {
     	
-    	userMapper.savefinance(finance);
+    	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
+    	String time=format.format(new Date());
+    	
+    	finance.setTime(time);
+    	
+    	userMapper.savefinance(finance); 	
     	
     	String userunion = userMapper.getunionid(finance.getOpenid());
     	User tempuser = new User();
@@ -104,7 +113,7 @@ public class UserController extends BaseController {
 		User Boss=userMapper.querybossbyid(tempuser);
 		String bossunion = userMapper.getunionid(Boss.getOpenid());
 		
-		String ccid = "292bed8e86bc425bbd9351d6af4ed51bd80c40a00633843cf63028498837e178";
+		String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
 		String urla ="";
 		String res="";
 		
@@ -134,7 +143,7 @@ public class UserController extends BaseController {
 		User Boss=userMapper.querybossbyid(tempuser);
 		String bossunion = userMapper.getunionid(Boss.getOpenid());
 		
-		String ccid = "292bed8e86bc425bbd9351d6af4ed51bd80c40a00633843cf63028498837e178";
+		String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
 		String urla ="";
 		String res="";
 		
