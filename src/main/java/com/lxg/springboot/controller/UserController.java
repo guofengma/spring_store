@@ -135,8 +135,8 @@ public class UserController extends BaseController {
     @RequestMapping("deletefinance")
     public Msg deletefinance(Finance finance) {
     	
-    	userMapper.deletefinance(finance);
-    	
+    	int i =userMapper.deletefinance(finance);
+    	if(i!=0){
     	String userunion = userMapper.getunionid(finance.getOpenid());
     	User tempuser = new User();
 		tempuser.setStoreid(finance.getStoreid());
@@ -156,6 +156,7 @@ public class UserController extends BaseController {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
 		}
 		
     	return ResultUtil.success();

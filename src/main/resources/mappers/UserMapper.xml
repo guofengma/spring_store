@@ -109,7 +109,7 @@
 		 where openid=#{openid} and  storeid=#{storeid} ) as temp
 	</select>
 	
-	<update id="deletefinance" parameterType="com.lxg.springboot.model.Finance">
+	<update id="deletefinance" parameterType="com.lxg.springboot.model.Finance" resultType="int">
 		delete from finance where openid=#{openid} and  storeid=#{storeid}
 	</update>
 	
