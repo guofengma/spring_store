@@ -117,7 +117,7 @@ public class WxApiController {
             e.printStackTrace();
         }            
 
-        String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
+        String ccid = "7442cca3ea7be0cdcf85e1ebd87b49dce6fe7ee7e4c166c32f11a096610adc22";
         String urla = "https://store.lianlianchains.com/kd/query?func=isAccExists&ccId=" + ccid + "&" + "usr=" + unionId + "&" + "acc=" + unionId;
         
         String resa = null;

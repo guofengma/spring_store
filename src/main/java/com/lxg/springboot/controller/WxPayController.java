@@ -185,7 +185,7 @@ public class WxPayController {
 		tempuser.setStoreid(Order.getStoreid());
 		User Boss=userMapper.querybossbyid(tempuser);
 		String bossunion = userMapper.getunionid(Boss.getOpenid());
-		String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
+		String ccid = "7442cca3ea7be0cdcf85e1ebd87b49dce6fe7ee7e4c166c32f11a096610adc22";
 		String urla ="";
 		String res="";
 			
@@ -315,7 +315,7 @@ public class WxPayController {
     		String userunion = userMapper.getunionid(openid);
     		tempuser.setStoreid(Order.getStoreid());
     		String bossunion = userMapper.getunionid(Boss.getOpenid());
-    		String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
+    		String ccid = "7442cca3ea7be0cdcf85e1ebd87b49dce6fe7ee7e4c166c32f11a096610adc22";
     		String urla ="";
     		String res="";
     		
@@ -637,7 +637,7 @@ public class WxPayController {
     		if (fee!=0){
     		long now =  System.currentTimeMillis();  
     		String ms = now + "";
-    		String ccid = "7590f31d29f96f08fef626eb2dca619012f21cfe211606db8447fe6a668d9f1d";
+    		String ccid = "7442cca3ea7be0cdcf85e1ebd87b49dce6fe7ee7e4c166c32f11a096610adc22";
     		String url = "https://store.lianlianchains.com/kd/invoke?func=allocEarning&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + shop.get(i).getStoreId()
     				+ "&" + "slr=" + shop.get(i).getDeal() + "&"  + "pfm=" + shop.get(i).getDeal() + "&"  + "fld=" + shop.get(i).getField() + "&" + "dvy=" + shop.get(i).getSupply()
     				+ "&" + "tamt=" + Integer.toString(fee) + "&ak=" + ms ;
