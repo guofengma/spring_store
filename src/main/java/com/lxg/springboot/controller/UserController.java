@@ -17,6 +17,7 @@ import com.lxg.springboot.model.Shop;
 import com.lxg.springboot.model.User;
 import com.lxg.springboot.service.HttpAPIService;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -126,7 +127,7 @@ public class UserController extends BaseController {
 		User Boss=userMapper.querybossbyid(tempuser);
 		String bossunion = userMapper.getunionid(Boss.getOpenid());
 		
-		String ccid = "7442cca3ea7be0cdcf85e1ebd87b49dce6fe7ee7e4c166c32f11a096610adc22";
+		String ccid = "";
 		String urla ="";
 		String res="";
 		
@@ -159,7 +160,7 @@ public class UserController extends BaseController {
     @RequestMapping("deletefinance")
     public Msg deletefinance(Finance finance) {
     	
-    	int i =userMapper.deletefinance(finance);
+    	int i =userMapper.deletecount(finance);
     	if(i!=0){
     	String userunion = userMapper.getunionid(finance.getOpenid());
     	User tempuser = new User();
@@ -167,7 +168,7 @@ public class UserController extends BaseController {
 		User Boss=userMapper.querybossbyid(tempuser);
 		String bossunion = userMapper.getunionid(Boss.getOpenid());
 		
-		String ccid = "7442cca3ea7be0cdcf85e1ebd87b49dce6fe7ee7e4c166c32f11a096610adc22";
+		String ccid = "";
 		String urla ="";
 		String res="";
 		
@@ -182,11 +183,14 @@ public class UserController extends BaseController {
 			e.printStackTrace();
 		}
 		
-
-		if (!res.equals("0")){
+		JSONObject json = JSON.parseObject(res);  
+		String resc = json.getString("code");
+		
+		if (!resc.equals("0")){
 			return ResultUtil.fail("区块链连接错误");
 		}
     	
+		userMapper.deletefinance(finance);
 		
 		/*urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + bossunion	+ "&" + "acc=" + bossunion + "&" + "reacc=" + userunion +  "&" + "amt=" + finance.getScore() + "&tstp=积分理财提取&desc=积分理财提取" ;
 		
@@ -203,6 +207,7 @@ public class UserController extends BaseController {
     	return ResultUtil.success();
     } 
     
+    @Scheduled(cron = "0 0 1 ? * MON" )
     @RequestMapping("financeThread")
     public Msg financeThread() throws IOException { 
     	Calendar c8 = Calendar.getInstance();
@@ -216,33 +221,35 @@ public class UserController extends BaseController {
         c1.add(Calendar.DATE, - 1); 
         Date d1 = c1.getTime();
         String timed1=format.format(d1);     
+        timed8 = userMapper.lasttime();
 		String timeS = timed8 + "000000";
 		String timeE = timed1 + "235959";
 		
-		Calendar c7 = Calendar.getInstance();
-        c7.setTime(new Date());
-        c7.add(Calendar.DATE, - 7);
-        
-        Date d7 = c7.getTime();
-        String fid=format.format(d7); 
+        String fid= timed8;
 		
 		List<Shop> shop;
 		shop= shopMapper.query();
     	String temp = "";
-		
+    	Finance user = new Finance();
+    	user.setTime(fid);
 		Order order = new Order();
 		for(int i=0;i<shop.size();i++){
+			user.setStoreid(shop.get(i).getStoreId());
+			int flag = userMapper.storecount(user);
+			if(flag!=0){
     		if(!temp.equals("")){
     			temp = temp + ";";
     		}
-        	order.setStartDate(timeS);
+        	/*order.setStartDate(timeS);
         	order.setEndDate(timeE);
-        	order.setStoreid(shop.get(i).getStoreId());
-        	int fee=skuMapper.allmoney(order);
+        	order.setStoreid(shop.get(i).getStoreId());*/
+        	int fee=5000;
         	temp = temp + shop.get(i).getStoreId()+":"+ fee;
+			}
     		}
 		
-		String ccid = "7442cca3ea7be0cdcf85e1ebd87b49dce6fe7ee7e4c166c32f11a096610adc22";
+		if(!temp.equals("")){
+		String ccid = "";
     	String urla = "https://store.lianlianchains.com/kd/invoke?func=financeBouns&ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&fid="+ fid + "&rscfg=" + temp;
 		
 		String res = null;
@@ -260,18 +267,20 @@ public class UserController extends BaseController {
 		if (!resc.equals("0")){
 			return ResultUtil.fail("区块链连接错误");
 		}
+		}
     	
     	return ResultUtil.success();
 		
     }
     
     
+    @Scheduled(cron = "0 0 23 ? * MON" )
     @RequestMapping("financeThreadend")
     public Msg financeThreadend() throws IOException { 
     	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
         String time = format.format(new Date());     
 
-		String ccid = "7442cca3ea7be0cdcf85e1ebd87b49dce6fe7ee7e4c166c32f11a096610adc22";
+		String ccid = "";
     	String urla = "https://store.lianlianchains.com/kd/invoke?func=financeIssueFinish&ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&fid="+ time;
 		
 		String res = null;
@@ -290,7 +299,67 @@ public class UserController extends BaseController {
 			return ResultUtil.fail("区块链连接错误");
 		}
     	
+		userMapper.updatelasttime(time);
+		
     	return ResultUtil.success();
+		
+    }
+    
+    @RequestMapping("queryalone")
+    public Msg queryalone(String unionId,String storeId) throws IOException { 
+    
+		String ccid = "";
+    	String urla = "https://store.lianlianchains.com/kd/query?func=getRackFinanceProfit&ccId=" + ccid + "&" + "usr=" + unionId	+ "&" + "acc=" + unionId + "&"+ "rid=" + storeId;
+		
+		
+		String res = null;
+		
+		try {
+			res = httpAPIService.doGet(urla);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		JSONObject json = JSON.parseObject(res);  
+		String resc = json.getString("code");
+		
+		if (!resc.equals("0")){
+			return ResultUtil.fail("区块链连接错误");
+		}
+    	
+    	return ResultUtil.success(res);
+		
+    }
+    
+    @RequestMapping("querylimit")
+    public Msg querylimit(String storeId) throws IOException { 
+    	
+    	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
+        String time = format.format(new Date());     
+
+    
+		String ccid = "";
+    	String urla = "https://store.lianlianchains.com/kd/query?func=getRackRestFinanceCapacity&ccId=" + ccid + "&" + "&usr=centerBank&acc=centerBank&"+ "rid=" + storeId + "&fid="+ time;
+		
+    	
+		String res = null;
+		
+		try {
+			res = httpAPIService.doGet(urla);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		JSONObject json = JSON.parseObject(res);  
+		String resc = json.getString("code");
+		
+		if (!resc.equals("0")){
+			return ResultUtil.fail("区块链连接错误");
+		}
+    	
+    	return ResultUtil.success(res);
 		
     }
 }

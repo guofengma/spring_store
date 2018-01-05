@@ -54,4 +54,12 @@ public interface UserMapper {
 	Finance queryfinancebyid(Finance user);
 	
 	void updatefinance(Finance user);
+	
+	int deletecount(Finance user);
+	
+	int storecount(Finance user);
+	
+	String lasttime();
+	
+	void updatelasttime(String lasttime);
 }

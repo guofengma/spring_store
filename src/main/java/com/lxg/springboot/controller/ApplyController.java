@@ -545,7 +545,7 @@ public class ApplyController extends BaseController {
     	user.setRole("boss");
     	userMapper.saveboss(user);
     	
-    	String ccid = "7442cca3ea7be0cdcf85e1ebd87b49dce6fe7ee7e4c166c32f11a096610adc22";
+    	String ccid = "";
 		String urla = "https://store.lianlianchains.com/kd/invoke?func=setAllocCfg&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + id
 				+ "&" + "slr=" + apply.getDealper() + "&"  + "pfm=" + apply.getPlatper() + "&"  + "fld=" + apply.getFieldper() + "&" + "dvy=" + apply.getSupplyper();
 		
@@ -706,7 +706,7 @@ public class ApplyController extends BaseController {
         	int fee=skuMapper.allmoney(order);
         	temp = temp + shop.get(i).getStoreId()+","+ fee + "," +dealunion+ ","+fieldunion+ ","+supplyunion+ ","+platform;
     		}
-        	String ccid = "7442cca3ea7be0cdcf85e1ebd87b49dce6fe7ee7e4c166c32f11a096610adc22";
+        	String ccid = "";
         	String urla = "https://store.lianlianchains.com/kd/invoke?func=encourageScoreForSales&" + "ccId=" + ccid + "&" + "usr=kdcoinpool&acc=kdcoinpool&desc=月度奖励积分&cfg="+ temp;
     		
     		String res = null;

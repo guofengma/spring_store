@@ -70,6 +70,14 @@
 		select bosspay from systemparam limit 1
 	</select>
 	
+	<select id="lasttime" resultType="String">
+		select lasttime from systemparam limit 1
+	</select>
+	
+	<update id="updatelasttime" parameterType="String">
+		update systemparam SET lasttime=#{lasttime} 
+	</update>
+	
 	<select id="queryallboss"  resultType="com.lxg.springboot.model.User">
 		select * from userboss  
 	</select>
@@ -118,5 +126,14 @@
 		 set score=#{score}
 		 where openid=#{openid} and  storeid=#{storeid}
 	</update>
+	
+	<select id="deletecount" parameterType="com.lxg.springboot.model.Finance" resultType="int">
+		select count(*) from finance where openid=#{openid} and storeid=#{storeid}
+	</select>
+	
+	<select id="storecount" parameterType="com.lxg.springboot.model.Finance" resultType="int">
+		select count(*) from finance where storeid=#{storeid}
+	</select>
+	
 
 </mapper>  
