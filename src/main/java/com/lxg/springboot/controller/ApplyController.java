@@ -1,6 +1,7 @@
 package com.lxg.springboot.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.lxg.springboot.mapper.ApplyMapper;
 import com.lxg.springboot.mapper.FieldMapper;
@@ -11,6 +12,7 @@ import com.lxg.springboot.model.Apply;
 import com.lxg.springboot.model.ApplyIf;
 import com.lxg.springboot.model.Applypage;
 import com.lxg.springboot.model.Field;
+import com.lxg.springboot.model.HttpResult;
 import com.lxg.springboot.model.Msg;
 import com.lxg.springboot.model.Order;
 import com.lxg.springboot.model.OrderAll;
@@ -20,10 +22,15 @@ import com.lxg.springboot.model.Shop;
 import com.lxg.springboot.model.Token;
 import com.lxg.springboot.model.User;
 import com.lxg.springboot.service.HttpAPIService;
+import com.lxg.springboot.util.CheckSumBuilder;
+import com.lxg.springboot.util.RandomStringGenerator;
+
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -64,8 +71,15 @@ public class ApplyController extends BaseController {
 	private String appid;
 	@Value("${wx.appSecret}")
 	private String appSecret;
+	@Value("${sms.appKey}")
+    private String smsappKey;
+    @Value("${sms.appSecret}")
+    private String smsappSecret;    
+
 	@Resource
 	private HttpAPIService httpAPIService;
+	
+	private static final Logger logger = LoggerFactory.getLogger(FileController.class);
 
     @RequestMapping("insert")
     public Msg save(Apply apply) { 
@@ -128,13 +142,51 @@ public class ApplyController extends BaseController {
     }    
     
     @RequestMapping("update")
-    public Result update(Apply apply) {
+    public Result update(Apply apply) throws Exception {
     	if(apply.getFieldstate() == 1 )
         	applyMapper.updatefieldstate(apply);
     	if(apply.getDealstate() == 1)
     		applyMapper.updatedealstate(apply);
     	if(apply.getSupplystate() == 1)
-    		applyMapper.updatesupplystate(apply);    	
+    		applyMapper.updatesupplystate(apply); 
+    	
+    	Apply temp = new Apply();
+        temp = applyMapper.queryone(apply);
+        if(temp.getFieldstate() == 1 && temp.getDealstate() == 1 && temp.getSupplystate() == 1)
+        {
+        String url = "https://api.netease.im/sms/sendtemplate.action";
+   	 	String appKey = smsappKey;
+        String appSecret = smsappSecret;
+        String nonce = RandomStringGenerator.getRandomStringByLength(6);
+        String curTime = String.valueOf((new Date()).getTime() / 1000L);
+        String checkSum = CheckSumBuilder.getCheckSum(appSecret, nonce ,curTime);
+        
+        // 参数
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        JSONArray phone = new JSONArray();
+        phone.add(temp.getDealphone());
+        
+        JSONArray param = new JSONArray();
+        DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+        String timed=format.format(new Date());   
+        param.add(timed);
+        
+        map.put("mobiles", phone);
+        map.put("templateid", 3992197);
+        map.put("params", param);
+        
+        logger.warn("发送短信参数" + map);
+        // 请求头
+        HashMap<String, Object> header = new HashMap<String, Object>();
+        header.put("AppKey", appKey);
+        header.put("Nonce", nonce);
+        header.put("CurTime", curTime);
+        header.put("CheckSum", checkSum);
+        
+        HttpResult res = httpAPIService.doPost(url, map, header);
+        
+        logger.warn("发送短信结果" + res);
+        }
     	return new Result();
     } 
     
@@ -151,7 +203,7 @@ public class ApplyController extends BaseController {
     } 
     
     @RequestMapping("opapply")
-    public Msg opapply(String openid,int id,int roletype,String optype) {
+    public Msg opapply(String openid,int id,int roletype,String optype) throws Exception {
     Apply apply = new Apply();
     apply.setId(id);
     if(roletype==0){
@@ -230,6 +282,8 @@ public class ApplyController extends BaseController {
     		apply.setSupplyname(field.getName());
     		apply.setGoodtype(field.getGoodtype());
     		applyMapper.updatesupplyaddress(apply);
+    		
+    		
     		}
     		else{
     			return ResultUtil.fail("供货超过10个");	
@@ -247,9 +301,91 @@ public class ApplyController extends BaseController {
     	}
     	applyMapper.updatesupply(apply);	
     }
+    if(optype.equals("join")){
+    Apply temp = new Apply();
+    temp = applyMapper.queryone(apply);
+	if(temp.getField()==null || temp.getField().equals("")){
+		return ResultUtil.success();		
+	}
+	if(temp.getDeal()==null || temp.getDeal().equals("")){
+		return ResultUtil.success();		
+	}
+	if(temp.getSupply()==null || temp.getSupply().equals("")){
+		return ResultUtil.success();	
+	}
+	 String url = "https://api.netease.im/sms/sendtemplate.action";
+	 String appKey = smsappKey;
+     String appSecret = smsappSecret;
+     String nonce = RandomStringGenerator.getRandomStringByLength(6);
+     String curTime = String.valueOf((new Date()).getTime() / 1000L);
+     String checkSum = CheckSumBuilder.getCheckSum(appSecret, nonce ,curTime);
+     
+     // 参数
+     HashMap<String, Object> map = new HashMap<String, Object>();
+     JSONArray phone = new JSONArray();
+     phone.add(temp.getFieldphone());
+     if(!temp.getDealphone().equals(temp.getFieldphone()))
+     phone.add(temp.getDealphone());
+     if(!(temp.getSupplyphone().equals(temp.getDealphone())||temp.getSupplyphone().equals(temp.getFieldphone())))
+     phone.add(temp.getSupplyphone());
+     
+     JSONArray param = new JSONArray();
+     DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+     String timed=format.format(new Date());   
+     param.add(timed);
+     
+     map.put("mobiles", phone);
+     map.put("templateid", 4022273);
+     map.put("params", param);
+        
+     logger.warn("发送短信参数" + map);
+     // 请求头
+     HashMap<String, Object> header = new HashMap<String, Object>();
+     header.put("AppKey", appKey);
+     header.put("Nonce", nonce);
+     header.put("CurTime", curTime);
+     header.put("CheckSum", checkSum);
+     
+     HttpResult res = httpAPIService.doPost(url, map, header);
+     
+     logger.warn("发送短信结果" + res);
+     return ResultUtil.success(res);
+    }
     	return ResultUtil.success();
     }
     
+    @RequestMapping("opupdate")
+    public Msg opupdate(String openid,int id,int roletype,Field field) {
+    Apply apply = new Apply();
+    apply.setId(id);
+    if(roletype==0){ 
+    		apply.setField(openid); 		
+    		apply.setFieldaddress(field.getAddress());
+    		apply.setComname(field.getComname());
+    		apply.setComnum(field.getComnum());
+    		apply.setFieldfee(field.getFee());
+    		apply.setFieldname(field.getName());
+    		apply.setFieldphone(field.getPhone());
+    		apply.setImg1(field.getImg1());
+    		apply.setImg2(field.getImg2());
+    		apply.setImg3(field.getImg3());
+    		applyMapper.updatefieldaddress(apply); 
+    }
+    else if(roletype==1){
+    		apply.setDealaddress(field.getAddress());
+    		apply.setDealname(field.getName());
+    		apply.setDealphone(field.getPhone());
+    		applyMapper.updatedealaddress(apply);
+    }
+    else if(roletype==2){
+    		apply.setSupplyaddress(field.getAddress());
+    		apply.setSupplyphone(field.getPhone());
+    		apply.setSupplyname(field.getName());
+    		apply.setGoodtype(field.getGoodtype());
+    		applyMapper.updatesupplyaddress(apply);
+    	}
+    	return ResultUtil.success();
+    }
     
     @RequestMapping("perset")
     public Msg perset(int id,int roletype,int per) {
@@ -669,6 +805,7 @@ public class ApplyController extends BaseController {
     	return ResultUtil.success(retshop);
     }
     
+    @Scheduled(cron = "0 15 02 1 * ?" )
     @RequestMapping("income")
     public Msg income() throws Exception {
     	

@@ -72,6 +72,8 @@ public class Apply extends BasicObject {
 	
 	private String comnum;
 	
+	private String openid;
+	
 	
 	public int getId() {
 		return id;
@@ -319,6 +321,14 @@ public class Apply extends BasicObject {
 
 	public void setComnum(String comnum) {
 		this.comnum = comnum;
+	}
+
+	public String getOpenid() {
+		return openid;
+	}
+
+	public void setOpenid(String openid) {
+		this.openid = openid;
 	}
 
 	

@@ -31,6 +31,8 @@ public class Shop implements Serializable {
 	private String supply;
 	
 	private String supplyname;
+	
+	private int servicestate;
 
 	public String getStoreId() {
 		return StoreId;
@@ -118,6 +120,14 @@ public class Shop implements Serializable {
 
 	public void setSupplyname(String supplyname) {
 		this.supplyname = supplyname;
+	}
+
+	public int getServicestate() {
+		return servicestate;
+	}
+
+	public void setServicestate(int servicestate) {
+		this.servicestate = servicestate;
 	}
 
 }

@@ -114,12 +114,33 @@
 	
 	<select id="query" parameterType="com.lxg.springboot.model.Apply" resultType="com.lxg.springboot.model.Apply">
 		SELECT * from apply
+		<if test="openid != null and openid != ''">
+		where (field = #{openid} or deal = #{openid} or supply = #{openid})
+		</if>
+		order by id desc		
+		limit #{page},#{pagenum}
+	</select>	
+	
+	<select id="querybyopenid" parameterType="com.lxg.springboot.model.Apply" resultType="com.lxg.springboot.model.Apply">
+		SELECT * from apply
 		order by id desc
+		where (field = #{openid} or deal = #{openid} or supply = #{openid})
+		limit #{page},#{pagenum}
+	</select>	
+	
+	<select id="querybyopenidcount" parameterType="com.lxg.springboot.model.Apply" resultType="int">
+		SELECT count(*) from apply
+		order by id desc
+		where (field = #{openid} or deal = #{openid} or supply = #{openid})
 		limit #{page},#{pagenum}
 	</select>	
 	
 	<select id="querybyad" parameterType="com.lxg.springboot.model.Apply" resultType="com.lxg.springboot.model.Apply">
-		SELECT * FROM apply where ( fieldaddress like CONCAT('%',#{address},'%') or dealaddress like CONCAT('%',#{address},'%') or supplyaddress like CONCAT('%',#{address},'%'))  ORDER BY id DESC
+		SELECT * FROM apply where ( fieldaddress like CONCAT('%',#{address},'%') or dealaddress like CONCAT('%',#{address},'%') or supplyaddress like CONCAT('%',#{address},'%'))  
+		<if test="openid != null and openid != ''">
+		and (field = #{openid} or deal = #{openid} or supply = #{openid})
+		</if>
+		ORDER BY id DESC
 		limit #{page},#{pagenum}
 	</select>
 	
@@ -129,10 +150,16 @@
 	
 	<select id="querypage" parameterType="com.lxg.springboot.model.Apply" resultType="int">
 			select count(id) from apply
+			<if test="openid != null and openid != ''">
+			where (field = #{openid} or deal = #{openid} or supply = #{openid})
+			</if>
 	</select>
 		
 	<select id="querypagead" parameterType="com.lxg.springboot.model.Apply" resultType="int">
 			SELECT count(apply.id) from apply where ( fieldaddress like CONCAT('%',#{address},'%') or dealaddress like CONCAT('%',#{address},'%') or supplyaddress like CONCAT('%',#{address},'%'))
+			<if test="openid != null and openid != ''">
+			and (field = #{openid} or deal = #{openid} or supply = #{openid})
+			</if>
 	</select>
 	
 	<select id="fieldcount" parameterType="com.lxg.springboot.model.Apply" resultType="int">

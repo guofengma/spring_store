@@ -17,9 +17,13 @@ public interface ApplyMapper {
 	
 	List<Apply> query(Apply apply);
 	
+	List<Apply> querybyopenid(Apply apply);
+	
 	List<Apply> querybyad(Apply apply);
 	
 	int querymax();
+	
+	int querybyopenidcount(Apply apply);
 	
 	int querypage(Apply apply);
 	

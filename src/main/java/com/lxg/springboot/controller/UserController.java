@@ -240,10 +240,10 @@ public class UserController extends BaseController {
     		if(!temp.equals("")){
     			temp = temp + ";";
     		}
-        	/*order.setStartDate(timeS);
+        	order.setStartDate(timeS);
         	order.setEndDate(timeE);
-        	order.setStoreid(shop.get(i).getStoreId());*/
-        	int fee=5000;
+        	order.setStoreid(shop.get(i).getStoreId());
+    		int fee=skuMapper.allmoney(order);
         	temp = temp + shop.get(i).getStoreId()+":"+ fee;
 			}
     		}

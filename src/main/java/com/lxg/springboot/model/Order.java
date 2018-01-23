@@ -13,7 +13,7 @@ public class Order extends BasicObject {
 	private String openid;// 用户标识
 	private int usedScore;// 抵扣积分
 	private int bonusScore;// 奖励积分
-	private double charges;//手续费
+	private String charges;//手续费
 	private int state;//状态
 	private int checkstate;//状态
 	private String time;//时间
@@ -81,11 +81,11 @@ public class Order extends BasicObject {
 		this.bonusScore = bonusScore;
 	}
 
-	public double getCharges() {
+	public String getCharges() {
 		return charges;
 	}
 
-	public void setCharges(double charges) {
+	public void setCharges(String charges) {
 		this.charges = charges;
 	}
 

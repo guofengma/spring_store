@@ -9,11 +9,23 @@ public interface OrderMapper {
 
 	int save(Order order);
 	
+	int saveshop(Order order);
+	
 	int update(Order order);
+	
+	int updateshop(Order order);
 	
 	int updatecheck(Order order);
 	
+	int updateredpack(Order order);
+	
+	int countredpack(Order order);
+	
 	Order querybyno(Order order);
+	
+	Order queryredpack(Order order);
+	
+	Order querybynoshop(Order order);
 	
 	List<Order> query(Order order);
 	

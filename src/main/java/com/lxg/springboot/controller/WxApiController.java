@@ -57,6 +57,19 @@ public class WxApiController {
 
 	}
 	
+	@RequestMapping("wx/getbossopenid")
+	public String getbossopenid(String code) throws Exception {
+
+		String url = "https://api.weixin.qq.com/sns/jscode2session?" + "appid=wx22980810fa9f0ba3"  + "&" + "secret=37d21a432132c6ded1066bd73e76cfde" 
+				+ "&" + "js_code=" + code + "&" + "grant_type=authorization_code";
+
+		String res = httpAPIService.doGet(url);
+
+		return res;
+
+	
+	}
+	
 	@RequestMapping("wx/access_token")
 	public String getaccess_token() throws Exception {
 
@@ -104,6 +117,34 @@ public class WxApiController {
     }
     
     
+    @RequestMapping({"wx/decodePhone"})
+    public Map decodePhone(String encryptedData, String iv, String openid, String session_key)
+    {
+      Map map = new HashMap();
+      try
+      {
+        String result = AesCbcUtil.decrypt(encryptedData, session_key, iv, "UTF-8");
+        if ((result != null) && (result.length() > 0))
+        {
+          map.put("status", Integer.valueOf(1));
+          map.put("msg", "解密成功");
+          
+          JSONObject userInfoJSON = JSONObject.fromObject(result);
+          Map userInfo = new HashMap();
+          userInfo.put("phone", userInfoJSON.get("purePhoneNumber"));
+          map.put("ret", userInfo);
+          return map;
+        }
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+        
+        map.put("status", Integer.valueOf(0));
+        map.put("msg", "解密失败");
+      }
+      return map;
+    }
     
 	@RequestMapping("wx/account")
 	public Msg account(String openid,String unionId) throws Exception {
@@ -246,74 +287,4 @@ public class WxApiController {
 
 	}
 	
-	@RequestMapping("wx/getTwoBarCodes")
-	public void  getTwoBarCodes(String StoreId,String StoreName,int width,HttpServletResponse response) throws Exception {
-		// 获取token
-		String urltoken = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&" + "appid=" + appid
-				+ "&" + "secret=" + appSecret;
-
-		Token token = JSON.parseObject(httpAPIService.doGet(urltoken), Token.class);
-
-		String url = "https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode?access_token="
-				+ token.getAccess_token();
-
-		// 参数
-
-		// 参数
-		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("path","pages/index/index"+"?StoreId="+ StoreId+"&StoreName="+ StoreName);
-		map.put("width",width);
-
-		HashMap<String, Object> maptemp = new HashMap<String, Object>();
-		maptemp.put("Jsondata", JSON.toJSONString(map));
-
-		// 请求头
-		HashMap<String, Object> header = new HashMap<String, Object>();
-
-		byte[] data = httpAPIService.doPostImg(url, maptemp, header);
-		response.setContentType("image/png");
-
-        OutputStream stream = response.getOutputStream();
-        stream.write(data);
-        stream.flush();
-        stream.close();
-	}
-	
-	@RequestMapping("CVS/apply/getTwoBarCodes")
-	public void  getTwoBar(String storeid,HttpServletResponse response) throws Exception {
-		
-		Shop retshop = new Shop();
-    	retshop = shopMapper.querybyid(storeid);
-    	
-		// 获取token
-		String urltoken = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&" + "appid=" + appid
-				+ "&" + "secret=" + appSecret;
-
-		Token token = JSON.parseObject(httpAPIService.doGet(urltoken), Token.class);
-
-		String url = "https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode?access_token="
-				+ token.getAccess_token();
-
-		// 参数
-
-		// 参数
-		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("path","pages/index/index"+"?StoreId="+ storeid+"&StoreName="+ retshop.getStoreName());
-		map.put("width",5000);
-
-		HashMap<String, Object> maptemp = new HashMap<String, Object>();
-		maptemp.put("Jsondata", JSON.toJSONString(map));
-
-		// 请求头
-		HashMap<String, Object> header = new HashMap<String, Object>();
-
-		byte[] data = httpAPIService.doPostImg(url, maptemp, header);
-		response.setContentType("image/png");
-
-        OutputStream stream = response.getOutputStream();
-        stream.write(data);
-        stream.flush();
-        stream.close();
-	}
-
 }

@@ -1,29 +1,42 @@
 package com.lxg.springboot.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.lxg.springboot.mapper.CommentMapper;
 import com.lxg.springboot.mapper.GoodMapper;
 import com.lxg.springboot.mapper.OrderMapper;
 import com.lxg.springboot.mapper.ShopMapper;
+import com.lxg.springboot.mapper.ShopOrderMapper;
 import com.lxg.springboot.mapper.UserMapper;
 import com.lxg.springboot.model.Comment;
 import com.lxg.springboot.model.Good;
+import com.lxg.springboot.model.HttpResult;
+import com.lxg.springboot.model.Msg;
 import com.lxg.springboot.model.Order;
 import com.lxg.springboot.model.OrderAll;
 import com.lxg.springboot.model.OrderGood;
 import com.lxg.springboot.model.Result;
+import com.lxg.springboot.model.ResultUtil;
 import com.lxg.springboot.model.Shop;
+import com.lxg.springboot.model.ShopOrder;
 import com.lxg.springboot.model.User;
 import com.lxg.springboot.model.UserBoss;
+import com.lxg.springboot.service.HttpAPIService;
+import com.lxg.springboot.util.CheckSumBuilder;
 import com.lxg.springboot.util.MatrixToImageWriter;
+import com.lxg.springboot.util.RandomStringGenerator;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -47,15 +60,17 @@ public class ShopController{
     private CommentMapper commentMapper;
 	@Resource
     private UserMapper userMapper;
-
-	
-    @RequestMapping("qrcode")
-    public void qrcode(String data, HttpServletResponse response, Integer width, Integer height) throws Exception {
-
-	    MatrixToImageWriter.createRqCode(data, width, height, response.getOutputStream());
-    	
-    }
+	@Resource
+    private ShopOrderMapper shopOrderMapper;
+	@Value("${sms.appKey}")
+    private String smsappKey;
+    @Value("${sms.appSecret}")
+    private String smsappSecret; 
+    @Resource
+	private HttpAPIService httpAPIService;
     
+    private static final Logger logger = LoggerFactory.getLogger(FileController.class);
+	    
     @RequestMapping("CVS/shopinsert")
     public Result getshop(Shop shop){
     	shopMapper.insert(shop);
@@ -75,6 +90,48 @@ public class ShopController{
     	Shop temp = new Shop();  
     	temp.setStoreName("对不起，附近不存在店面");
     	return temp;
+    }
+    
+    @RequestMapping("CVS/shopfirst")
+    public Msg shopfirst(String phoneno) throws Exception {
+    	User temp3=new User();
+    	temp3.setPhoneno(phoneno);
+    	int i = userMapper.countbossp(temp3);
+       
+    	if (i>=1){
+    		return ResultUtil.success(1);	
+    	}
+    	else{
+    		return ResultUtil.success(0);
+    	}
+    	         
+    }
+    
+    @RequestMapping("CVS/shopopen")
+    public Msg register(String storeid,String phoneno,String password) throws Exception {
+    	User temp=new User();
+    	User temp1=new User();
+    	temp.setStoreid(storeid);
+    	temp.setRole("boss");
+    	temp1 = userMapper.querybossrole(temp);
+    	if (temp1.getPhoneno().equals(phoneno)){
+    		 return ResultUtil.success();
+    	}
+    	
+    	
+    	User user=new User();
+    	user.setPhoneno(phoneno);
+    	user.setPassword(password);
+    	user.setStoreid(storeid);
+    	user.setRole("operator");
+    	try{
+    	userMapper.saveboss(user);
+    	}
+    	catch (Exception e) {
+    		userMapper.updatebossbyphone(user);
+        }
+    	    
+        return ResultUtil.success();
     }
     
     @RequestMapping("CVS/total")
@@ -555,6 +612,219 @@ public class ShopController{
     		
 		return returngood;
     }  
+    
+    @RequestMapping("CVS/issueOrder")
+    public Msg issueOrder(ShopOrder shopOrder){	
+    	int i = shopOrderMapper.querybyidcount(shopOrder);
+    	if (i>=1){
+    		return ResultUtil.fail("已有发起订单");
+    	}
+    	shopOrderMapper.insert(shopOrder);;
+    	shopOrderMapper.updatestateonly(shopOrder);
+    	shopOrderMapper.updatestate(shopOrder);
+    	
+    	return ResultUtil.success();
+    }
+    
+    @RequestMapping("CVS/editOrder")
+    public Msg editOrder(ShopOrder shopOrder){	
+    	shopOrderMapper.update(shopOrder);
+    	
+    	return ResultUtil.success();
+    }
+    
+    @RequestMapping("CVS/getorder")
+    public Msg getorder(ShopOrder shopOrder) throws Exception{	
+    	shopOrder.setServicestate(2);
+    	shopOrderMapper.updatestateorder(shopOrder);
+    	shopOrderMapper.updatestate(shopOrder);
+    	
+    	String url = "https://api.netease.im/sms/sendtemplate.action";
+    	String appKey = smsappKey;
+        String appSecret = smsappSecret;
+        String nonce = RandomStringGenerator.getRandomStringByLength(6);
+        String curTime = String.valueOf((new Date()).getTime() / 1000L);
+        String checkSum = CheckSumBuilder.getCheckSum(appSecret, nonce ,curTime);
+        
+        // 参数
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        JSONArray phone = new JSONArray();
+        User temp = new User();
+        temp.setStoreid(shopOrder.getStoreId());
+        User boss = new User();
+        boss = userMapper.querybossbyid(temp);
+        phone.add(boss.getPhoneno());
+        
+        
+        JSONArray param = new JSONArray();
+        DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+        String timed=format.format(new Date());   
+        param.add(timed);
+        
+        map.put("mobiles", phone);
+        map.put("templateid", 3972218);
+        map.put("params", param);
+           
+        logger.warn("发送短信参数" + map);
+        // 请求头
+        HashMap<String, Object> header = new HashMap<String, Object>();
+        header.put("AppKey", appKey);
+        header.put("Nonce", nonce);
+        header.put("CurTime", curTime);
+        header.put("CheckSum", checkSum);
+        
+        HttpResult res = httpAPIService.doPost(url, map, header);
+        
+        logger.warn("发送短信结果" + res);
+    	
+    	return ResultUtil.success();
+    }
+    
+    @RequestMapping("CVS/cancelorder")
+    public Msg cancelorder(ShopOrder shopOrder){	
+    	shopOrder.setServicestate(1);
+    	shopOrder.setOpenid("");
+    	shopOrderMapper.updatestateorder(shopOrder);
+    	shopOrderMapper.updatestate(shopOrder);
+    	
+    	return ResultUtil.success();
+    }
+    
+    @RequestMapping("CVS/querybypos")
+    public Msg querybypos(ShopOrder shopOrder){	
+    	double lat = shopOrder.getLat();
+    	double lng = shopOrder.getLng();
+    	shopOrder.setLat1(lat-0.05);
+    	shopOrder.setLat2(lat+0.05);
+    	
+    	shopOrder.setLng1(lng-0.07);
+    	shopOrder.setLng2(lng+0.07);
+    	
+    	return ResultUtil.success(shopOrderMapper.querybypos(shopOrder));
+    }
+    
+    
+    
+    @RequestMapping("CVS/querybyopenid")
+    public Msg querybyopenid(ShopOrder shopOrder){
+    	
+    	return ResultUtil.success(shopOrderMapper.querybyopenid(shopOrder));
+    }
+    
+    @RequestMapping("CVS/queryall")
+    public Msg queryall(ShopOrder shopOrder){
+    	
+    	return ResultUtil.success(shopOrderMapper.queryall(shopOrder));
+    }
+    
+    @RequestMapping("CVS/queryallname")
+    public Msg queryallname(ShopOrder shopOrder){
+    	
+    	return ResultUtil.success(shopOrderMapper.queryallname(shopOrder));
+    }
+    
+    @RequestMapping("CVS/querybyid")
+    public ShopOrder querybyid(ShopOrder shopOrder){	
+    	
+    	
+    	return shopOrderMapper.querybyid(shopOrder);
+    }
+    
+    @RequestMapping("CVS/updateimage")
+    public Msg updateimage(ShopOrder shopOrder){	
+    	
+    	
+    	shopOrderMapper.updateimage(shopOrder);
+    	shopOrderMapper.updatestate(shopOrder);
+    	
+    	return ResultUtil.success();
+    }
+    
+    @RequestMapping("CVS/updatestorestate")
+    public Msg updatestorestate(ShopOrder shopOrder){	
+    	
+    	shopOrderMapper.updatestateonly(shopOrder);
+    	shopOrderMapper.updatestate(shopOrder);
+    	
+    	return ResultUtil.success();
+    }
+    
+    @RequestMapping("CVS/delete")
+    public Msg delete(ShopOrder shopOrder){	
+    	shopOrder.setServicestate(0);
+    	shopOrderMapper.delete(shopOrder);
+    	shopOrderMapper.updatestate(shopOrder);
+    	
+    	return ResultUtil.success();
+    }
+    
+    @RequestMapping("CVS/finish")
+    public Msg finish(ShopOrder shopOrder) throws Exception{	
+    	
+    	shopOrderMapper.updateimage(shopOrder);
+    	
+    //	User temp = new User();
+    //	temp.setStoreid(shopOrder.getStoreId());
+    //	temp.setPhoneno(shopOrder.getPhone());
+    	
+    //	userMapper.deleteauth(temp);
+    	
+    	String url = "https://api.netease.im/sms/sendtemplate.action";
+    	String appKey = smsappKey;
+        String appSecret = smsappSecret;
+        String nonce = RandomStringGenerator.getRandomStringByLength(6);
+        String curTime = String.valueOf((new Date()).getTime() / 1000L);
+        String checkSum = CheckSumBuilder.getCheckSum(appSecret, nonce ,curTime);
+        
+        // 参数
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        JSONArray phone = new JSONArray();
+        User temp = new User();
+        temp.setStoreid(shopOrder.getStoreId());
+        User boss = new User();
+        boss = userMapper.querybossbyid(temp);
+        phone.add(boss.getPhoneno());
+        
+        
+        JSONArray param = new JSONArray();
+        DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+        String timed=format.format(new Date());   
+        param.add(timed);
+        
+        map.put("mobiles", phone);
+        map.put("templateid", 3942243);
+        map.put("params", param);
+           
+        logger.warn("发送短信参数" + map);
+        // 请求头
+        HashMap<String, Object> header = new HashMap<String, Object>();
+        header.put("AppKey", appKey);
+        header.put("Nonce", nonce);
+        header.put("CurTime", curTime);
+        header.put("CheckSum", checkSum);
+        
+        HttpResult res = httpAPIService.doPost(url, map, header);
+        
+        logger.warn("发送短信结果" + res);
+    	
+    	return ResultUtil.success();
+    }
+    
+    @RequestMapping("CVS/finishtofour")
+    public Msg finishtofour(ShopOrder shopOrder){	
+    	
+    	shopOrderMapper.updatestateonly(shopOrder);
+    	shopOrderMapper.updatestate(shopOrder);
+    	
+    	User temp = new User();
+    	temp.setStoreid(shopOrder.getStoreId());
+    	temp.setPhoneno(shopOrder.getPhone());
+    	
+    	userMapper.deleteauth(temp);
+    	
+    	return ResultUtil.success();
+    }
+    
     
     /** 
      * 转化为弧度(rad) 

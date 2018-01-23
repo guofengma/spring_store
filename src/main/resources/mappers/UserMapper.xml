@@ -41,6 +41,19 @@
 		 where openid=#{openid} and storeid=#{storeid}
 	</update>
 	
+	<update id="updatebossbyphone" parameterType="com.lxg.springboot.model.User">
+		 update userboss 
+		 set 
+		 role=#{role}
+		 where phoneno=#{phoneno} and storeid=#{storeid}
+	</update>
+	
+	<update id="deleteauth" parameterType="com.lxg.springboot.model.User">
+		 update userboss 
+		 set role='noauth'
+		 where phoneno=#{phoneno} and storeid=#{storeid} and role='operator'
+	</update>
+	
 	<select id="queryboss" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
 		select * from userboss 
 		where openid=#{openid} and storeid=#{storeid}
@@ -58,12 +71,12 @@
 		
 	<select id="querybynoboss" parameterType="com.lxg.springboot.model.User" resultType="com.lxg.springboot.model.User">
 		select * from userboss 
-		where phoneno=#{phoneno}
+		where phoneno=#{phoneno} and (role='boss' or role='operator')
 	</select>
 	
 	<select id="countboss" parameterType="com.lxg.springboot.model.User" resultType="int">
 		select count(*) from userboss 
-		where phoneno=#{phoneno} and password=#{password} 
+		where phoneno=#{phoneno} and password=#{password} and (role='boss' or role='operator')
 	</select>
 	
 	<select id="bosspay" resultType="int">

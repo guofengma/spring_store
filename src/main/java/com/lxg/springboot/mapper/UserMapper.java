@@ -12,6 +12,8 @@ public interface UserMapper {
 	int save(User user);
 	
 	int update(User user);
+	
+	int deleteauth(User user);
 
 	User query(User user);
 	
@@ -20,6 +22,8 @@ public interface UserMapper {
 	int saveboss(User user);
 	
 	int updateboss(User user);
+	
+	int updatebossbyphone(User user);
 
 	User queryboss(User user);
 	

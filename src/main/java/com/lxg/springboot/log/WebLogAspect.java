@@ -4,6 +4,7 @@ import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.ServletWebRequest;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
  
 /**
  * 实现Web层的日志切面
@@ -44,7 +48,7 @@ public class WebLogAspect {
      
      @Before("webLog()")
      public void doBefore(JoinPoint joinPoint){
-        
+    	try{      
        // 接收到请求，记录请求内容
         logger.info("WebLogAspect.doBefore()");
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -52,25 +56,39 @@ public class WebLogAspect {
         
         
       // 记录下请求内容
-        logger.info("URL : " + request.getRequestURL().toString());
-        logger.info("HTTP_METHOD : " + request.getMethod());
-        logger.info("IP : " + request.getRemoteAddr());
-        logger.info("CLASS_METHOD : " + joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());
-        logger.info("INPUT : " + Arrays.toString(joinPoint.getArgs()));
+        logger.warn("URL : " + request.getRequestURL().toString()+"\n"+"INPUT : " + JSON.toJSONString(joinPoint.getArgs()));
+ //       logger.warn("HTTP_METHOD : " + request.getMethod());
+ //       logger.warn("IP : " + request.getRemoteAddr());
+ //      logger.warn("CLASS_METHOD : " + joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());
+ //       logger.warn("INPUT : " + Arrays.toString(joinPoint.getArgs()));
        //获取所有参数方法一：
         Enumeration<String> enu=request.getParameterNames(); 
         while(enu.hasMoreElements()){ 
             String paraName=(String)enu.nextElement(); 
-            System.out.println(paraName+": "+request.getParameter(paraName)); 
+            logger.info(paraName+": "+request.getParameter(paraName)); 
         } 
+    	}
+    	catch(Exception e){
+    		logger.info("log error");	
+    	}
      }
      
      @AfterReturning(returning = "rvt", pointcut = "webLog()")  
-     public void  doAfterReturning(Object rvt){
+     public void  doAfterReturning(JoinPoint joinPoint,Object rvt){
+    	try{
        // 处理完请求，返回内容
         logger.info("WebLogAspect.doAfterReturning()");
-
-        logger.info("RETURN : " + rvt.toString());
+        
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+             
+     // 记录下请求内容
+        logger.warn("URL : " + request.getRequestURL().toString()+"\n"+"RETURN : " +  JSON.toJSONString(rvt));
+ //       logger.warn("RETURN : " +  JSON.toJSONString(rvt));
+        
+    	}catch(Exception e){
+    		logger.info("log error");	
+    	}
      }
      
 }

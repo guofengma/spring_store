@@ -7,8 +7,19 @@
 		values (#{orderNo},#{mch_id},#{openid},#{description},#{fee},#{charges},#{time},#{usedScore},#{bonusScore},#{state},#{checkstate},#{storeid})
 	</insert>
 	
+	<insert id="saveshop" parameterType="com.lxg.springboot.model.Order">
+		insert into storeorders(orderNo,mch_id,openid,description,fee,charges,time,usedScore,bonusScore,state,checkstate,storeid)
+		values (#{orderNo},#{mch_id},#{openid},#{description},#{fee},#{charges},#{time},#{usedScore},#{bonusScore},#{state},#{checkstate},#{storeid})
+	</insert>
+	
 	<update id="update" parameterType="com.lxg.springboot.model.Order">
 		 update orders 
+		 set state=#{state}
+		 where orderNo=#{orderNo}
+	</update>
+	
+	<update id="updateshop" parameterType="com.lxg.springboot.model.Order">
+		 update storeorders 
 		 set state=#{state}
 		 where orderNo=#{orderNo}
 	</update>
@@ -19,13 +30,34 @@
 		 where orderNo=#{orderNo}
 	</update>
 	
+	<update id="updateredpack" parameterType="com.lxg.springboot.model.Order">
+		 update redpack 
+		 set state=#{state}
+		 where description=#{description}
+	</update>
+	
 	<select id="query" parameterType="com.lxg.springboot.model.Order" resultType="com.lxg.springboot.model.Order">
 		select * from orders 
 		where openid=#{openid}
 	</select>
 	
+	<select id="queryredpack" parameterType="com.lxg.springboot.model.Order" resultType="com.lxg.springboot.model.Order">
+		select * from redpack 
+		where description=#{description}
+	</select>
+	
+	<select id="countredpack" parameterType="com.lxg.springboot.model.Order" resultType="int">
+		select count(*) from redpack 
+		where description=#{description} and state=0
+	</select>
+	
 	<select id="querybyno" parameterType="com.lxg.springboot.model.Order" resultType="com.lxg.springboot.model.Order">
 		select * from orders 
+		where orderNo=#{orderNo}
+	</select>
+	
+	<select id="querybynoshop" parameterType="com.lxg.springboot.model.Order" resultType="com.lxg.springboot.model.Order">
+		select * from storeorders 
 		where orderNo=#{orderNo}
 	</select>
 	

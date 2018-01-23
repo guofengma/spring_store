@@ -47,7 +47,7 @@ public class Signature {
 		}
 		String result = new String(sb.toString().getBytes("UTF-8"));
 		result += "key=79m1jyaofjonvahln1wnoq606rvbk2gi";
-		System.out.println("签名数据：" + result);
+//		logger.info("签名数据：" + result);
 		result = MD5.MD5Encode(result).toUpperCase();
 		return result;
 	}

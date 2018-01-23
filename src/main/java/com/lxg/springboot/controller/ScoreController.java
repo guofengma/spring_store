@@ -12,6 +12,9 @@ import com.lxg.springboot.service.HttpAPIService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.Resource;
 
 /**
@@ -21,6 +24,7 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("CVS/score/")
 public class ScoreController extends BaseController {
+	 private Logger logger =  LoggerFactory.getLogger(this.getClass());
 	
 	@Resource
     private ScoreMapper scoreMapper;
@@ -82,7 +86,7 @@ public class ScoreController extends BaseController {
 	    
 	    @RequestMapping("query")
 	    public Msg query(String unionId) {
-	    	System.out.println("企业支付结果：" + unionId);
+	    	logger.info("企业支付结果：" + unionId);
 			
 
 	    	String ccid = "";
@@ -97,7 +101,7 @@ public class ScoreController extends BaseController {
 				e.printStackTrace();
 			}
 			
-			System.out.println("企业支付结果：" + res);
+			logger.info("企业支付结果：" + res);
 			
 			JSONObject json = JSON.parseObject(res);  
 			String resc = json.getString("code");

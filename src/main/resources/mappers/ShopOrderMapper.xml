@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxg.springboot.mapper.ShopOrderMapper">
+	<select id="insert" parameterType="com.lxg.springboot.model.ShopOrder">
+		insert into storeorder(StoreId,address,StoreName,lng,lat,name,price,phone,time,city)
+		values (#{StoreId},#{address},#{StoreName},#{lng},#{lat},#{name},#{price},#{phone},#{time},#{city})
+	</select>
+	
+	<select id="query" resultType="com.lxg.springboot.model.ShopOrder">
+		select * from storeorder  and (servicestate=1 or servicestate=2 or servicestate=3)
+	</select>
+	
+	<select id="querybyid" parameterType="com.lxg.springboot.model.ShopOrder" resultType="com.lxg.springboot.model.ShopOrder">
+		select * from storeorder where StoreId=#{StoreId} and (servicestate=1 or servicestate=2 or servicestate=3)
+	</select>
+	
+	<select id="querybyidcount" parameterType="com.lxg.springboot.model.ShopOrder" resultType="int">
+		select count(*) from storeorder where StoreId=#{StoreId} and (servicestate=1 or servicestate=2 or servicestate=3)
+	</select>
+	
+	<select id="querybyopenid" parameterType="com.lxg.springboot.model.ShopOrder" resultType="com.lxg.springboot.model.ShopOrder">
+		select * from storeorder where openid=#{openid} and (servicestate=1 or servicestate=2 or servicestate=3)
+	</select>
+	
+	<select id="querybypos" parameterType="com.lxg.springboot.model.ShopOrder" resultType="com.lxg.springboot.model.ShopOrder">
+		select * from storeorder where servicestate=1 
+    	and lng &gt;=#{lng1}
+    	and lng &lt;=#{lng2}
+    	and lat &gt;=#{lat1}
+    	and lat &lt;=#{lat2}
+	</select>
+	
+	<select id="queryall" parameterType="com.lxg.springboot.model.ShopOrder" resultType="com.lxg.springboot.model.ShopOrder">
+		select * from storeorder where servicestate=1 
+	</select>
+	
+	
+	<select id="queryallname" parameterType="com.lxg.springboot.model.ShopOrder" resultType="com.lxg.springboot.model.ShopOrder">
+		select * from storeorder where servicestate=1 and  StoreName like CONCAT('%',#{StoreName},'%')
+	</select>
+	
+	<update id="update" parameterType="com.lxg.springboot.model.ShopOrder">
+		 update storeorder 
+		 set price=#{price},name=#{name},
+		 time=#{time},phone=#{phone}
+		 where StoreId=#{StoreId} and (servicestate=1 or servicestate=2 or servicestate=3)
+	</update>
+	
+	<update id="updateimage" parameterType="com.lxg.springboot.model.ShopOrder">
+		 update storeorder 
+		 set img1=#{img1},img2=#{img2},img3=#{img3}
+		 where StoreId=#{StoreId} and (servicestate=1 or servicestate=2 or servicestate=3)
+	</update>
+	
+	<update id="updatestateorder" parameterType="com.lxg.springboot.model.ShopOrder">
+		 update storeorder 
+		 set servicestate=#{servicestate},openid=#{openid},opphone=#{opphone}
+		 where StoreId=#{StoreId} and (servicestate=1 or servicestate=2 or servicestate=3)
+	</update>
+	
+	<update id="updatestate" parameterType="com.lxg.springboot.model.ShopOrder">
+		 update store 
+		 set servicestate=#{servicestate}
+		 where StoreId=#{StoreId}
+	</update>
+	
+	<update id="updatestateonly" parameterType="com.lxg.springboot.model.ShopOrder">
+		 update storeorder 
+		 set servicestate=#{servicestate}
+		 where StoreId=#{StoreId} and (servicestate=0 or servicestate=1 or servicestate=2 or servicestate=3)
+	</update>
+	
+	<update id="delete" parameterType="com.lxg.springboot.model.ShopOrder">
+		 delete from storeorder 
+		 where StoreId=#{StoreId} and (servicestate=0 or servicestate=1 or servicestate=2 or servicestate=3)
+	</update>
+	
+</mapper>  

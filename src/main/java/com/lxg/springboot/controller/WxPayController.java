@@ -52,6 +52,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;  
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -80,6 +83,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @RestController
 public class WxPayController {
+	private Logger logger =  LoggerFactory.getLogger(this.getClass());
 	
     @Value("${wx.appid}")
     private String appid; 
@@ -131,7 +135,7 @@ public class WxPayController {
         	if(returngood.getAmount()<cart.get(i).getAmount()){
         		JSONObject jsonA = new JSONObject();
         		jsonA.put("returncode", "01");
-        		jsonA.put("returnmsg", returngood.getName()+"库存不足");
+        		jsonA.put("returnmsg", "库存不足");
         		return jsonA.toJSONString();
         	}
         	else{
@@ -166,7 +170,7 @@ public class WxPayController {
 		String sign = Signature.getSign(order);
 		order.setSign(sign);
 		
-		System.out.println("body===="+order.getBody());
+		logger.info("body===="+order.getBody());
 		
 		HttpResult result = httpAPIService.doPost("https://api.mch.weixin.qq.com/pay/unifiedorder", order);
 		
@@ -188,12 +192,55 @@ public class WxPayController {
 		String ccid = "";
 		String urla ="";
 		String res="";
-			
+					
+		return json.toJSONString();
+    }
+    
+    
+    @RequestMapping("wxpay/prepayshop")
+    public String prepayshop(Order Order) throws Exception {	
+		OrderInfo order = new OrderInfo();
+		String orderNo = RandomStringGenerator.getRandomStringByLength(32);
+		Order.setState(0);
+    	Date date=new Date(); 
+		DateFormat format=new SimpleDateFormat("yyyyMMddHHmmss"); 
+		String time=format.format(date);
+		Order.setTime(time);
+		Order.setOrderNo(orderNo);
+		Order.setTime(time);
+		Order.setState(2);
+		Order.setCheckstate(0);
+		orderMapper.saveshop(Order);
+		int totalfee=(int) (Order.getFee()*100);
+		order.setAppid(appid);
+		order.setMch_id(mch_id);
+		order.setNonce_str(RandomStringGenerator.getRandomStringByLength(32));
+		order.setBody(new String(Order.getDescription().getBytes(),"UTF-8"));
+		order.setOut_trade_no(orderNo);
+		order.setTotal_fee(totalfee);
+		order.setSpbill_create_ip("123.57.218.54");
+		order.setNotify_url("https://store.lianlianchains.com/wxpay/shopresult");
+		order.setTrade_type("JSAPI");
+		order.setOpenid(Order.getOpenid());
+		order.setSign_type("MD5");
+		//生成签名
+		String sign = Signature.getSign(order);
+		order.setSign(sign);
 		
+		logger.info("body===="+order.getBody());
 		
+		HttpResult result = httpAPIService.doPost("https://api.mch.weixin.qq.com/pay/unifiedorder", order);
 		
-		
-		
+		XStream xStream = new XStream();
+		xStream.alias("xml", OrderReturnInfo.class); 
+
+		OrderReturnInfo returnInfo = (OrderReturnInfo)xStream.fromXML(result.getBody());
+		JSONObject json = new JSONObject();
+		json.put("prepay_id", returnInfo.getPrepay_id());
+		json.put("return_code", returnInfo.getReturn_code());
+		json.put("return_msg", returnInfo.getReturn_msg());
+		json.put("orderNo", orderNo);
+					
 		return json.toJSONString();
     }
     
@@ -221,165 +268,6 @@ public class WxPayController {
 		
     }
 
-    @RequestMapping("wxpay/result")
-    public void result(HttpServletRequest request,HttpServletResponse response) throws IOException {  	
-    	System.out.println("微信支付回调");
-        InputStream inStream = request.getInputStream();
-        ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len = 0;
-        while ((len = inStream.read(buffer)) != -1) {
-            outSteam.write(buffer, 0, len);
-        }
-        outSteam.close();
-        inStream.close();
-        String result = new String(outSteam.toByteArray(), "utf-8");
-        System.out.println("微信支付通知结果：" + result);
-        Map<String, String> map = null;
-        try {
-            /**
-             * 解析微信通知返回的信息
-             */
-            map = XmlUtil.doXMLParse(result);
-        } catch (JDOMException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-        Order Order = new Order();
-        Order.setOrderNo(map.get("out_trade_no"));
-        Order tempOrder = new Order();
-        tempOrder = orderMapper.querybyno(Order);
-        String openid = tempOrder.getOpenid();
-        int score = tempOrder.getUsedScore();
-      
-        if(tempOrder.getState()!=1){        	
-        if (map.get("result_code").equals("SUCCESS")) {      	
-        	Order.setState(1);
-        	List<OrderGood> temp;
-        	temp=orderMapper.queryGood(Order);
-        	for(int i=0 ;i<temp.size();i++){
-        		Good good = new Good();
-        		good.setCode(temp.get(i).getCode());
-            	good.setStoreid(temp.get(i).getStoreid());
-            	Good returngood = new Good();
-            	returngood=goodMapper.querybyCode(good);
-            	System.out.println("减库存"+ returngood.getAmount()+temp.get(i).getAmount());
-            	returngood.setAmount(returngood.getAmount()-temp.get(i).getAmount());
-            	goodMapper.update(returngood);		
-    	}
-        	orderMapper.update(Order);     
-        	//企业付款
-        	int fee = (int) (tempOrder.getFee()*100); 
-        	System.out.println("企业支付结果：" + fee);
-        	String feeS = Integer.toString(fee);
-        	String paternerKey="79m1jyaofjonvahln1wnoq606rvbk2gi";
-    		Map<String, String> parm = new HashMap<String, String>();
-    		String orderNo = RandomStringGenerator.getRandomStringByLength(32);
-    		Order OrderPay = new Order();
-    		OrderPay.setOrderNo(orderNo);
-    		OrderPay.setFee(tempOrder.getFee());
-    		String storeid=tempOrder.getMch_id();
-    		User tempuser = new User();
-    		tempuser.setStoreid(storeid);
-    		User Boss=userMapper.querybossbyid(tempuser);
-    		try{		
-    		parm.put("mch_appid", appid); //公众账号appid
-    		parm.put("mchid", "1472139902"); //商户号
-    		parm.put("nonce_str", RandomStringGenerator.getRandomStringByLength(32)); //随机字符串
-    		parm.put("partner_trade_no",orderNo); //商户订单号
-    		parm.put("openid", Boss.getOpenid()); //用户openid	
-    		parm.put("check_name", "FORCE_CHECK"); //校验用户姓名选项 OPTION_CHECK
-    		parm.put("re_user_name", Boss.getNickname()); //check_name设置为FORCE_CHECK或OPTION_CHECK，则必填
-    		parm.put("amount", feeS); //转账金额
-    		parm.put("desc", "快点支付"); //企业付款描述信息		
-    		parm.put("spbill_create_ip", InetAddress.getLocalHost().getHostAddress());
-    		parm.put("sign", PayUtil.getSign(parm, paternerKey));
-    		OrderPay.setMch_id("1472139902");
-    		Date date=new Date(); 
-    		DateFormat format=new SimpleDateFormat("yyyyMMddHHmmss"); 
-    		String time=format.format(date);
-    		OrderPay.setOpenid(Boss.getOpenid());
-    		OrderPay.setTime(time);
-    		OrderPay.setState(2);
-    		withDrawMapper.save(OrderPay);
-    		
-    		} catch (UnsupportedEncodingException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		} catch (UnknownHostException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}	
-    		
-    		String userunion = userMapper.getunionid(openid);
-    		tempuser.setStoreid(Order.getStoreid());
-    		String bossunion = userMapper.getunionid(Boss.getOpenid());
-    		String ccid = "";
-    		String urla ="";
-    		String res="";
-    		
-    		urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + bossunion	+ "&" + "acc=" + bossunion + "&" + "reacc=" + userunion +  "&" + "amt=5" + "&tstp=消费奖励积分&desc=消费奖励积分" ;
-    		
-    		res = null;
-    		
-    		try {
-    			res = httpAPIService.doGet(urla);
-    		} catch (Exception e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
-    		
-    		JSONObject json1 = JSON.parseObject(res);  
-    		String resc1 = json1.getString("code");
-    		
-    		if(score > 0){
-    			
-    	    	
-    			urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&" + "reacc=" + bossunion +  "&" + "amt=" + score + "&tstp=消费抵扣积分&desc=消费抵扣积分" ;
-    			
-    			res = null;
-    			
-    			try {
-    				res = httpAPIService.doGet(urla);
-    			} catch (Exception e) {
-    				// TODO Auto-generated catch block
-    				e.printStackTrace();
-    			}
-    			
-    			JSONObject json2 = JSON.parseObject(res);  
-    			String resc2 = json2.getString("code");
-    			
-    		}
-    		
-    		if(userMapper.bosspay()== 0){
-    		HttpResult result2 = HttpUtils.posts("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", XmlUtil.xmlFormat(parm, false));
-    			
-
-    		XStream xStream = new XStream();
-    		xStream.alias("xml", PayReturnInfo.class); 
-
-    		PayReturnInfo returnInfo = (PayReturnInfo)xStream.fromXML(result2.getBody());
-    		JSONObject json = new JSONObject();
-    		json.put("return_code", returnInfo.getReturn_code());
-    		json.put("return_msg", returnInfo.getReturn_msg());
-    		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
-    		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
-    		if (returnInfo.getResult_code().equals("SUCCESS")) {
-    			OrderPay.setState(1);		
-            }
-            else{
-            	OrderPay.setState(0);	
-            }               
-    		withDrawMapper.update(OrderPay);  	
-    		}
-        }
-        else{
-        	Order.setState(0);
-        	orderMapper.update(Order);     
-        }                  
-        }
-    }
     @RequestMapping("wxpay/increaseall")
     public Msg increaseall(IncreaseMoney inc) throws IOException { 
     	int tempnum = 0;
@@ -581,8 +469,8 @@ public class WxPayController {
     		    		JSONObject jsonre = new JSONObject();
     		    		jsonre.put("return_code", returnInfo.getReturn_code());
     		    		jsonre.put("return_msg", returnInfo.getReturn_msg());
-    		    		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
-    		    		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+    		    		logger.info("企业支付结果：" + returnInfo.getReturn_msg());
+    		    		logger.info("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
 //    		    		descr = descr + "错误信息：" + returnInfo.getErr_code_des();
     		    		temp.setErrmsg(returnInfo.getErr_code_des());
     		    		if (returnInfo.getResult_code().equals("SUCCESS")) {
@@ -632,7 +520,7 @@ public class WxPayController {
     		try{
     		fee = skuMapper.allmoney(order);       		
     		}catch (Exception e) {
-    			System.out.println("销售额为0");	
+    			logger.info("销售额为0");	
     		}
     		if (fee!=0){
     		long now =  System.currentTimeMillis();  
@@ -723,8 +611,8 @@ public class WxPayController {
     		JSONObject jsonre = new JSONObject();
     		jsonre.put("return_code", returnInfo.getReturn_code());
     		jsonre.put("return_msg", returnInfo.getReturn_msg());
-    		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
-    		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+    		logger.info("企业支付结果：" + returnInfo.getReturn_msg());
+    		logger.info("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
 //    		descr = descr + "错误信息：" + returnInfo.getErr_code_des();
     		temp.setErrmsg(returnInfo.getErr_code_des());
     		if (returnInfo.getResult_code().equals("SUCCESS")) {
@@ -779,8 +667,8 @@ public class WxPayController {
     		jsonre = new JSONObject();
     		jsonre.put("return_code", returnInfo.getReturn_code());
     		jsonre.put("return_msg", returnInfo.getReturn_msg());
-    		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
-    		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+    		logger.info("企业支付结果：" + returnInfo.getReturn_msg());
+    		logger.info("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
 //    		descr = descr + "错误信息：" + returnInfo.getErr_code_des();
     		temp.setErrmsg(returnInfo.getErr_code_des());
     		if (returnInfo.getResult_code().equals("SUCCESS")) {
@@ -836,8 +724,8 @@ public class WxPayController {
     		jsonre = new JSONObject();
     		jsonre.put("return_code", returnInfo.getReturn_code());
     		jsonre.put("return_msg", returnInfo.getReturn_msg());
-    		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
-    		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+    		logger.info("企业支付结果：" + returnInfo.getReturn_msg());
+    		logger.info("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
 //    		descr = descr + "错误信息：" + returnInfo.getErr_code_des();
     		temp.setErrmsg(returnInfo.getErr_code_des());
     		if (returnInfo.getResult_code().equals("SUCCESS")) {
@@ -893,8 +781,8 @@ public class WxPayController {
     		jsonre = new JSONObject();
     		jsonre.put("return_code", returnInfo.getReturn_code());
     		jsonre.put("return_msg", returnInfo.getReturn_msg());
-    		System.out.println("企业支付结果：" + returnInfo.getReturn_msg());
-    		System.out.println("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
+    		logger.info("企业支付结果：" + returnInfo.getReturn_msg());
+    		logger.info("企业支付结果：" + returnInfo.getErr_code()+returnInfo.getErr_code_des()+returnInfo.getResult_code());
  //   		descr = descr + "错误信息：" + returnInfo.getErr_code_des();
     		temp.setErrmsg(returnInfo.getErr_code_des());
     		temp.setDescription(descr);
@@ -909,11 +797,11 @@ public class WxPayController {
     		}
     		else
     		{
-    			System.out.println("区块链分账错误");
+    			logger.info("区块链分账错误");
     		}
     		}
     		else{
-    			System.out.println("区块链返回分账错误");
+    			logger.info("区块链返回分账错误");
     		}
     		}
     		}
