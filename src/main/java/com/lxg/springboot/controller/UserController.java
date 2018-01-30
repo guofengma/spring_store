@@ -157,6 +157,34 @@ public class UserController extends BaseController {
     	return ResultUtil.success();
     }  
     
+    @RequestMapping("scoretransfer")
+    public Msg scoretransfer(String unionto,String unionid,String score,String password) {
+    		
+		String ccid = "";
+		String urla ="";
+		String res="";
+		
+		urla ="https://store.lianlianchains.com/kd/invoke?func=transeferUsePwd&" + "ccId=" + ccid + "&" + "usr=" + unionid	+ "&" + "acc=" + unionid + "&" + "reacc=" + unionto +  "&" + "amt=" + score + "&tstp=积分交换&desc=积分交换&pwd="+ password;
+		
+		res = null;
+		
+		try {
+			res = httpAPIService.doGet(urla);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		JSONObject json = JSON.parseObject(res);  
+		String resc = json.getString("code");
+		
+		if (!resc.equals("0")){
+			return ResultUtil.fail("区块链连接错误");
+		}
+    			
+    	return ResultUtil.success();
+    } 
+    
     @RequestMapping("deletefinance")
     public Msg deletefinance(Finance finance) {
     	
@@ -207,13 +235,13 @@ public class UserController extends BaseController {
     	return ResultUtil.success();
     } 
     
-    @Scheduled(cron = "0 0 1 ? * MON" )
+    @Scheduled(cron = "0 0 1 * * ?" )
     @RequestMapping("financeThread")
     public Msg financeThread() throws IOException { 
     	Calendar c8 = Calendar.getInstance();
     	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
     	c8.setTime(new Date());
-        c8.add(Calendar.DATE, - 8); 
+        c8.add(Calendar.DATE, - 1); 
         Date d8 = c8.getTime();
         String timed8=format.format(d8);        
         Calendar c1 = Calendar.getInstance();
@@ -274,7 +302,7 @@ public class UserController extends BaseController {
     }
     
     
-    @Scheduled(cron = "0 0 23 ? * MON" )
+    @Scheduled(cron = "0 0 23 * * ?" )
     @RequestMapping("financeThreadend")
     public Msg financeThreadend() throws IOException { 
     	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 

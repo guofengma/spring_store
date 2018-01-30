@@ -12,6 +12,11 @@
 		values (#{orderNo},#{mch_id},#{openid},#{description},#{fee},#{charges},#{time},#{usedScore},#{bonusScore},#{state},#{checkstate},#{storeid})
 	</insert>
 	
+	<insert id="savecard" parameterType="com.lxg.springboot.model.Order">
+		insert into cardorders(orderNo,mch_id,openid,description,fee,charges,time,usedScore,bonusScore,state,checkstate,storeid)
+		values (#{orderNo},#{mch_id},#{openid},#{description},#{fee},#{charges},#{time},#{usedScore},#{bonusScore},#{state},#{checkstate},#{storeid})
+	</insert>
+	
 	<update id="update" parameterType="com.lxg.springboot.model.Order">
 		 update orders 
 		 set state=#{state}
@@ -20,6 +25,12 @@
 	
 	<update id="updateshop" parameterType="com.lxg.springboot.model.Order">
 		 update storeorders 
+		 set state=#{state}
+		 where orderNo=#{orderNo}
+	</update>
+	
+	<update id="updatecard" parameterType="com.lxg.springboot.model.Order">
+		 update cardorders 
 		 set state=#{state}
 		 where orderNo=#{orderNo}
 	</update>
@@ -61,6 +72,11 @@
 		where orderNo=#{orderNo}
 	</select>
 	
+	<select id="querybynocard" parameterType="com.lxg.springboot.model.Order" resultType="com.lxg.springboot.model.Order">
+		select * from cardorders 
+		where orderNo=#{orderNo}
+	</select>
+	
 	<select id="queryshop" parameterType="com.lxg.springboot.model.Order" resultType="com.lxg.springboot.model.Order">
 		select * from orders 
 		where storeid=#{storeid}
@@ -98,4 +114,20 @@
 	<select id="querytotalpageshop" resultType="int">
 		select count(orderNo) from orders where storeid=#{storeid}
 	</select>
+	
+	<update id="updatescore" parameterType="com.lxg.springboot.model.Order">
+		 update scoreorders 
+		 set state=#{state}
+		 where orderNo=#{orderNo}
+	</update>
+
+	<select id="querybynoscore" parameterType="com.lxg.springboot.model.Order" resultType="com.lxg.springboot.model.Order">
+		select * from scoreorders 
+		where orderNo=#{orderNo}
+	</select>
+
+	<insert id="savescore" parameterType="com.lxg.springboot.model.Order">
+		insert into scoreorders(orderNo,mch_id,openid,description,fee,charges,time,usedScore,bonusScore,state,checkstate,storeid)
+		values (#{orderNo},#{mch_id},#{openid},#{description},#{fee},#{charges},#{time},#{usedScore},#{bonusScore},#{state},#{checkstate},#{storeid})
+	</insert>
 </mapper>  

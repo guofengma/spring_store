@@ -9,6 +9,7 @@ import com.lxg.springboot.mapper.ShopMapper;
 import com.lxg.springboot.mapper.SkuMapper;
 import com.lxg.springboot.mapper.UserMapper;
 import com.lxg.springboot.model.Applypage;
+import com.lxg.springboot.model.Card;
 import com.lxg.springboot.model.Cart;
 import com.lxg.springboot.model.Good;
 import com.lxg.springboot.model.Shop;
@@ -454,6 +455,111 @@ public class ReturnResult {
         }
     }
     
+    @RequestMapping("wxpay/cardresult")
+    public void cardresult(HttpServletRequest request,HttpServletResponse response) throws IOException { 
+    	logger.info("cardresult进入回调函数");
+        InputStream inStream = request.getInputStream();
+        ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int len = 0;
+        while ((len = inStream.read(buffer)) != -1) {
+            outSteam.write(buffer, 0, len);
+        }
+        outSteam.close();
+        inStream.close();
+        String result = new String(outSteam.toByteArray(), "utf-8");
+        logger.info("cardresult微信支付通知结果：" + result);
+        Map<String, String> map = null;
+        try {
+            /**
+             * 解析微信通知返回的信息
+             */
+            map = XmlUtil.doXMLParse(result);
+        } catch (JDOMException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        Order Order = new Order();
+        Order.setOrderNo(map.get("out_trade_no"));
+        Order tempOrder = new Order();
+        tempOrder = orderMapper.querybynocard(Order);
+        
+        if(tempOrder.getState()!=1){        	
+        if (map.get("result_code").equals("SUCCESS")) { 
+        Order.setState(1);       
+        String openid = tempOrder.getOpenid();
+        Card card = new Card();
+        card.setOpenid(openid);
+        card.setCardNo(map.get("out_trade_no"));
+        orderMapper.updatecard(Order);    
+        userMapper.updatecard(card);
+        
+        String userunion = userMapper.getunionid(openid);
+		String ccid = "";
+		String urla ="";
+		String res="";
+		int i = (int) (tempOrder.getFee()*10);
+		urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=kdcoinpool" + "&" + "acc=kdcoinpool"  + "&" + "reacc=" + userunion +  "&" + "amt=" + i + "&tstp=购卡奖励积分&desc=购卡奖励积分" ;
+		
+		res = null;
+		
+		try {
+			res = httpAPIService.doGet(urla);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		JSONObject json1 = JSON.parseObject(res);  
+		String resc1 = json1.getString("code");
+    	}
+        }
+    }
+    
+    
+    @RequestMapping("wxpay/scoreresult")
+    public void scoreresult(HttpServletRequest request,HttpServletResponse response) throws IOException { 
+    	logger.info("cardresult进入回调函数");
+        InputStream inStream = request.getInputStream();
+        ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int len = 0;
+        while ((len = inStream.read(buffer)) != -1) {
+            outSteam.write(buffer, 0, len);
+        }
+        outSteam.close();
+        inStream.close();
+        String result = new String(outSteam.toByteArray(), "utf-8");
+        logger.info("cardresult微信支付通知结果：" + result);
+        Map<String, String> map = null;
+        try {
+            /**
+             * 解析微信通知返回的信息
+             */
+            map = XmlUtil.doXMLParse(result);
+        } catch (JDOMException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        Order Order = new Order();
+        Order.setOrderNo(map.get("out_trade_no"));
+        Order tempOrder = new Order();
+        tempOrder = orderMapper.querybynoscore(Order);
+        
+        if(tempOrder.getState()!=1){        	
+        if (map.get("result_code").equals("SUCCESS")) { 
+        Order.setState(1);       
+        String openid = tempOrder.getOpenid();
+        Card card = new Card();
+        card.setOpenid(openid);
+        card.setCardNo(map.get("out_trade_no"));
+        orderMapper.updatescore(Order);    
+    	}
+        }
+    }
+    
 /*    @RequestMapping(value = "wxpay/sendredpack")
    	public String sendredpack(Order Order,HttpServletResponse response) {
       	int fee = (int) (Order.getFee()*100); 
@@ -523,6 +629,7 @@ public class ReturnResult {
     	orderMapper.updateredpack(Order);
     	
     	int fee = (int) temp.getFee()*100;
+    	Order.setFee(fee);
     	String feeS = Integer.toString(fee);
     	String paternerKey="79m1jyaofjonvahln1wnoq606rvbk2gi";
 		Map<String, String> parm = new HashMap<String, String>();
@@ -572,7 +679,7 @@ public class ReturnResult {
         	Order.setState(0);	
         }               
 		withDrawMapper.update(Order);  
-		
+		orderMapper.updateredpack(Order);
 		return ResultUtil.success(feeS);
 	}
   

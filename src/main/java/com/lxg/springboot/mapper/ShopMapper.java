@@ -11,6 +11,8 @@ public interface ShopMapper {
 	
 	void insert(Shop shop);
 	
+	void update(Shop shop);
+	
 	void insertmore(Shop shop);
 
 	List<Shop> query();

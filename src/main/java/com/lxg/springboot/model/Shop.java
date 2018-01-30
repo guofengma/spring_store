@@ -32,6 +32,8 @@ public class Shop implements Serializable {
 	
 	private String supplyname;
 	
+	private double discount;
+	
 	private int servicestate;
 
 	public String getStoreId() {
@@ -128,6 +130,14 @@ public class Shop implements Serializable {
 
 	public void setServicestate(int servicestate) {
 		this.servicestate = servicestate;
+	}
+
+	public double getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(double discount) {
+		this.discount = discount;
 	}
 
 }

@@ -148,5 +148,18 @@
 		select count(*) from finance where storeid=#{storeid}
 	</select>
 	
-
+	<select id="querymax" resultType="int">
+			select max(cardNo) from card
+	</select>
+	
+	<insert id="savecard" parameterType="com.lxg.springboot.model.Card">
+		INSERT INTO card (cardNo,money)
+		values (#{cardNo},#{money})
+	</insert>
+	
+	<update id="updatecard" parameterType="com.lxg.springboot.model.Card">
+		 update card 
+		 set openid=#{openid}
+		 where cardNo=#{cardNo}
+	</update>
 </mapper>  

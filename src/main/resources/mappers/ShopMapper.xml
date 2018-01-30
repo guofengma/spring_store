@@ -6,6 +6,12 @@
 		values (#{StoreId},#{address},#{StoreName},#{lng},#{lat})
 	</select>
 	
+	<update id="update" parameterType="com.lxg.springboot.model.Shop">
+		 update store 
+		 set lng=#{lng},lat=#{lat}
+		 where StoreId=#{StoreId}
+	</update>
+	
 	<select id="insertmore" parameterType="com.lxg.springboot.model.Shop">
 		insert into store(StoreId,address,StoreName,lng,lat,deal,dealname,field,fieldname,supply,supplyname)
 		values (#{StoreId},#{address},#{StoreName},#{lng},#{lat},#{deal},#{dealname},#{field},#{fieldname},#{supply},#{supplyname})

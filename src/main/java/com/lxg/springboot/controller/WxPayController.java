@@ -8,7 +8,7 @@ import com.lxg.springboot.mapper.WithDrawMapper;
 import com.lxg.springboot.mapper.ShopMapper;
 import com.lxg.springboot.mapper.SkuMapper;
 import com.lxg.springboot.mapper.UserMapper;
-import com.lxg.springboot.model.Applypage;
+import com.lxg.springboot.model.Card;
 import com.lxg.springboot.model.Cart;
 import com.lxg.springboot.model.Good;
 import com.lxg.springboot.model.Shop;
@@ -135,7 +135,7 @@ public class WxPayController {
         	if(returngood.getAmount()<cart.get(i).getAmount()){
         		JSONObject jsonA = new JSONObject();
         		jsonA.put("returncode", "01");
-        		jsonA.put("returnmsg", "库存不足");
+        		jsonA.put("returnmsg",returngood.getName()+ "库存不足");
         		return jsonA.toJSONString();
         	}
         	else{
@@ -220,6 +220,108 @@ public class WxPayController {
 		order.setTotal_fee(totalfee);
 		order.setSpbill_create_ip("123.57.218.54");
 		order.setNotify_url("https://store.lianlianchains.com/wxpay/shopresult");
+		order.setTrade_type("JSAPI");
+		order.setOpenid(Order.getOpenid());
+		order.setSign_type("MD5");
+		//生成签名
+		String sign = Signature.getSign(order);
+		order.setSign(sign);
+		
+		logger.info("body===="+order.getBody());
+		
+		HttpResult result = httpAPIService.doPost("https://api.mch.weixin.qq.com/pay/unifiedorder", order);
+		
+		XStream xStream = new XStream();
+		xStream.alias("xml", OrderReturnInfo.class); 
+
+		OrderReturnInfo returnInfo = (OrderReturnInfo)xStream.fromXML(result.getBody());
+		JSONObject json = new JSONObject();
+		json.put("prepay_id", returnInfo.getPrepay_id());
+		json.put("return_code", returnInfo.getReturn_code());
+		json.put("return_msg", returnInfo.getReturn_msg());
+		json.put("orderNo", orderNo);
+					
+		return json.toJSONString();
+    }
+    
+    @RequestMapping("wxpay/prepayscore")
+    public String prepayscore(Order Order) throws Exception {	
+		OrderInfo order = new OrderInfo();
+		String orderNo = RandomStringGenerator.getRandomStringByLength(32);
+		Order.setState(0);
+    	Date date=new Date(); 
+		DateFormat format=new SimpleDateFormat("yyyyMMddHHmmss"); 
+		String time=format.format(date);
+		Order.setTime(time);
+		Order.setOrderNo(orderNo);
+		Order.setTime(time);
+		Order.setState(2);
+		Order.setCheckstate(0);
+		orderMapper.savescore(Order);
+		int totalfee=(int) (Order.getFee()*100);
+		order.setAppid(appid);
+		order.setMch_id(mch_id);
+		order.setNonce_str(RandomStringGenerator.getRandomStringByLength(32));
+		order.setBody(new String(Order.getDescription().getBytes(),"UTF-8"));
+		order.setOut_trade_no(orderNo);
+		order.setTotal_fee(totalfee);
+		order.setSpbill_create_ip("123.57.218.54");
+		order.setNotify_url("https://store.lianlianchains.com/wxpay/scoreresult");
+		order.setTrade_type("JSAPI");
+		order.setOpenid(Order.getOpenid());
+		order.setSign_type("MD5");
+		//生成签名
+		String sign = Signature.getSign(order);
+		order.setSign(sign);
+		
+		logger.info("body===="+order.getBody());
+		
+		HttpResult result = httpAPIService.doPost("https://api.mch.weixin.qq.com/pay/unifiedorder", order);
+		
+		XStream xStream = new XStream();
+		xStream.alias("xml", OrderReturnInfo.class); 
+
+		OrderReturnInfo returnInfo = (OrderReturnInfo)xStream.fromXML(result.getBody());
+		JSONObject json = new JSONObject();
+		json.put("prepay_id", returnInfo.getPrepay_id());
+		json.put("return_code", returnInfo.getReturn_code());
+		json.put("return_msg", returnInfo.getReturn_msg());
+		json.put("orderNo", orderNo);
+					
+		return json.toJSONString();
+    }
+    
+    @RequestMapping("wxpay/prepaycard")
+    public String prepaycard(Order Order) throws Exception {	
+		OrderInfo order = new OrderInfo();
+		String orderNo = RandomStringGenerator.getRandomStringByLength(32);
+		Order.setState(0);
+    	Date date=new Date(); 
+		DateFormat format=new SimpleDateFormat("yyyyMMddHHmmss"); 
+		String time=format.format(date);
+		Order.setTime(time);
+		Order.setOrderNo(orderNo);
+		Order.setTime(time);
+		Order.setState(2);
+		Order.setCheckstate(0);
+		orderMapper.savecard(Order);
+					
+		
+		int totalfee=(int) (Order.getFee()*100);
+		order.setAppid(appid);
+		order.setMch_id(mch_id);
+		order.setNonce_str(RandomStringGenerator.getRandomStringByLength(32));		
+		order.setBody(new String(Order.getDescription().getBytes(),"UTF-8"));
+		order.setOut_trade_no(orderNo);
+		
+		Card card = new Card();
+		card.setCardNo(orderNo);
+		card.setMoney((int)Order.getFee());
+		userMapper.savecard(card);
+		
+		order.setTotal_fee(totalfee);
+		order.setSpbill_create_ip("123.57.218.54");
+		order.setNotify_url("https://store.lianlianchains.com/wxpay/cardresult");
 		order.setTrade_type("JSAPI");
 		order.setOpenid(Order.getOpenid());
 		order.setSign_type("MD5");

@@ -6,6 +6,7 @@ import com.lxg.springboot.model.Finance;
 import com.lxg.springboot.model.Score;
 import com.lxg.springboot.model.Union;
 import com.lxg.springboot.model.User;
+import com.lxg.springboot.model.Card;
 
 public interface UserMapper {
 
@@ -66,4 +67,10 @@ public interface UserMapper {
 	String lasttime();
 	
 	void updatelasttime(String lasttime);
+	
+	int querymax(Card card);
+	
+	int savecard(Card card);
+	
+	int updatecard(Card card);
 }

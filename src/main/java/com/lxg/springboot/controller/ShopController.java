@@ -107,6 +107,26 @@ public class ShopController{
     	         
     }
     
+    @RequestMapping("CVS/discount")
+    public Msg discount(String storeid) throws Exception {
+    	Shop temp = new Shop();
+    	temp = shopMapper.querybyid(storeid);
+    		
+    	return ResultUtil.success(temp.getDiscount());
+    	
+    	         
+    }
+     
+    @RequestMapping("CVS/address")
+    public Msg address(Shop temp) throws Exception {
+
+    	shopMapper.update(temp);
+    		
+    	return ResultUtil.success();
+    	
+    	         
+    }
+    
     @RequestMapping("CVS/shopopen")
     public Msg register(String storeid,String phoneno,String password) throws Exception {
     	User temp=new User();

@@ -12,7 +12,7 @@ public class Order extends BasicObject {
 	private double fee;// 标价金额 ,单位为分
 	private String openid;// 用户标识
 	private int usedScore;// 抵扣积分
-	private int bonusScore;// 奖励积分
+	private String bonusScore;// 奖励积分
 	private String charges;//手续费
 	private int state;//状态
 	private int checkstate;//状态
@@ -73,11 +73,11 @@ public class Order extends BasicObject {
 		this.usedScore = usedScore;
 	}
 
-	public int getBonusScore() {
+	public String getBonusScore() {
 		return bonusScore;
 	}
 
-	public void setBonusScore(int bonusScore) {
+	public void setBonusScore(String bonusScore) {
 		this.bonusScore = bonusScore;
 	}
 
