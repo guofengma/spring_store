@@ -14,8 +14,10 @@ import com.lxg.springboot.model.OrderAll;
 import com.lxg.springboot.model.Result;
 import com.lxg.springboot.model.ResultUtil;
 import com.lxg.springboot.model.Shop;
+import com.lxg.springboot.model.Union;
 import com.lxg.springboot.model.User;
 import com.lxg.springboot.service.HttpAPIService;
+import com.lxg.springboot.util.CollectionUtil;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -157,6 +159,52 @@ public class UserController extends BaseController {
     	return ResultUtil.success();
     }  
     
+    @RequestMapping("querytransfer")
+    public Msg querytransfer(String unionto,String unionid,String score,String password) {
+    		
+		String ccid = "";
+		String urla ="";
+		String res="";
+		
+		urla ="https://store.lianlianchains.com/kd/query?func=transPreCheck&" + "ccId=" + ccid + "&" + "usr=" + unionid	+ "&" + "acc=" + unionid + "&" + "reacc=" + unionto +  "&" + "amt=" + score + "&tstp=积分交换&desc=积分交换&pwd="+ password;
+		
+		res = null;
+		
+		try {
+			res = httpAPIService.doGet(urla);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		JSONObject json = JSON.parseObject(res);  
+		String resc = json.getString("code");
+		
+		if (!resc.equals("0")){
+			return ResultUtil.fail(res);
+		}
+    			
+    	return ResultUtil.success(res);
+    } 
+    
+    
+    @RequestMapping("newredpack")
+    public Msg newredpack(String unionid) {
+    	
+    	Union temp = new Union();
+		temp.setUnionid(unionid);
+		temp.setState(0);
+		
+		String uuid = CollectionUtil.generateUUID();
+		
+		temp.setUuid(uuid);
+    			
+		userMapper.saveunionstate(temp);
+		
+    	return ResultUtil.success(uuid);
+    } 
+    
+    
     @RequestMapping("scoretransfer")
     public Msg scoretransfer(String unionto,String unionid,String score,String password) {
     		
@@ -179,10 +227,80 @@ public class UserController extends BaseController {
 		String resc = json.getString("code");
 		
 		if (!resc.equals("0")){
-			return ResultUtil.fail("区块链连接错误");
+			return ResultUtil.fail(res);
 		}
     			
-    	return ResultUtil.success();
+    	return ResultUtil.success(res);
+    } 
+    
+    @RequestMapping("transferquery")
+    public Msg transferquery(String unionto,String unionid,String amount) {
+    		
+		String ccid = "";
+		String urla ="";
+		String res="";
+		
+		urla ="https://store.lianlianchains.com/kd/query?func=transPreCheck&" + "ccId=" + ccid + "&" + "usr=" + unionid	+ "&" + "acc=" + unionid + "&" + "reacc=" + unionto +  "&" + "amt=" + amount + "&tstp=积分红包&desc=积分红包";
+		
+		res = null;
+		
+		try {
+			res = httpAPIService.doGet(urla);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		JSONObject json = JSON.parseObject(res);  
+		String resc = json.getString("code");
+		
+		if (!resc.equals("0")){
+			return ResultUtil.fail(res);
+		}
+    			
+    	return ResultUtil.success(res);
+    } 
+    
+    @RequestMapping("transfer")
+    public Msg transfer(String unionto,String unionid,String amount,String uuid) {
+    		
+		String ccid = "";
+		String urla ="";
+		String res="";
+		
+		Union temp = new Union();
+		temp.setUuid(uuid);
+		temp.setUnionid(unionid);
+		temp.setUnionto(unionto);
+		temp.setState(1);
+		
+		int flag = userMapper.getunionstate(temp);
+		
+		if (flag==0){
+		urla ="https://store.lianlianchains.com/kd/invoke?func=transefer&" + "usr=" + unionid	+ "&" + "acc=" + unionid + "&" + "reacc=" + unionto+ "&" + "amt="+ amount + "&tstp=积分红包&desc=积分红包";
+		
+		res = null;
+		
+		try {
+			res = httpAPIService.doGet(urla);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return ResultUtil.fail(res);
+		}
+		
+		JSONObject json = JSON.parseObject(res);  
+		String resc = json.getString("code");
+		
+		if (!resc.equals("0")){
+			return ResultUtil.fail(res);
+		}
+		
+		userMapper.updateunionstate(temp);
+		
+		}
+    			
+    	return ResultUtil.success(flag);
     } 
     
     @RequestMapping("deletefinance")
@@ -233,6 +351,37 @@ public class UserController extends BaseController {
 		}
 		
     	return ResultUtil.success();
+    } 
+    
+    @RequestMapping("resetPassword")
+    public Msg resetPassword(String password,String openid) {
+    	
+
+    	String userunion = userMapper.getunionid(openid);
+	
+		String ccid = "";
+		String urla ="";
+		String res="";
+		
+		urla = "https://store.lianlianchains.com/kd/invoke?func=resetAccPwd&ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&"+ "pwd=" + password ;
+		
+		res = null;
+		
+		try {
+			res = httpAPIService.doGet(urla);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		JSONObject json = JSON.parseObject(res);  
+		String resc = json.getString("code");
+		
+		if (!resc.equals("0")){
+			return ResultUtil.fail("区块链连接错误");
+		}
+
+    	return ResultUtil.success(res);
     } 
     
     @Scheduled(cron = "0 0 1 * * ?" )

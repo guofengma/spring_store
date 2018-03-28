@@ -640,7 +640,7 @@ public class ApplyController extends BaseController {
 		
 		  User temp=new User();
 	        temp.setPhoneno(fieldA.getPhone());
-	        int i = userMapper.countbossp(temp);
+	        int i = userMapper.countbossp1(temp);
 	        if(i!=0){
 	        	User tempUser = new User();
 	        	tempUser.setPhoneno(fieldA.getPhone());
@@ -729,7 +729,7 @@ public class ApplyController extends BaseController {
 
 		Token token = JSON.parseObject(httpAPIService.doGet(urltoken), Token.class);
 
-		String url = "https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode?access_token="
+		String url = "https://api.weixin.qq.com/wxa/getwxacode?access_token="
 				+ token.getAccess_token();
 
 		// 参数

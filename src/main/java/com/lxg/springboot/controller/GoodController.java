@@ -30,6 +30,11 @@ public class GoodController extends BaseController {
     	return goodMapper.queryall(good);  	
     } 
     
+    @RequestMapping("queryname")
+    public List<Good> queryname(Good good) {	
+    	return goodMapper.queryname(good);  	
+    } 
+    
     @RequestMapping("queryallsort")
     public List<GoodSort> queryall(Good good) {	
     	List<Good> temp;

@@ -42,11 +42,19 @@ public interface UserMapper {
 	
 	int countbossp(User user);
 	
+	int countbossp1(User user);
+	
 	int bosspay();
 	
 	List<User> queryallboss();
 	
 	void saveunion(Union union);
+	
+	void saveunionstate(Union union);
+	
+	void updateunionstate(Union union);
+	
+	int getunionstate(Union union);
 	
 	String getunionid(String openid);
 	

@@ -106,6 +106,17 @@ public class WxApiController {
                 map.put("userInfo", userInfo);
                 String unionId = userInfoJSON.getString("unionId");
                 
+                String urla = "https://store.lianlianchains.com/kd/register?func=account&ccId=" + "&" + "usr=" + unionId + "&" + "acc=" + unionId;
+                String resa = null;
+                try
+                {
+                	 resa = this.httpAPIService.doGet(urla);
+                }
+                catch (Exception e)
+                {
+                  e.printStackTrace();
+                }
+                
                 return map;
             }
         } catch (Exception e) {

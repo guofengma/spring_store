@@ -240,6 +240,9 @@ public class WxPayController {
 		json.put("return_code", returnInfo.getReturn_code());
 		json.put("return_msg", returnInfo.getReturn_msg());
 		json.put("orderNo", orderNo);
+		
+		Order.setBonusScore((returnInfo.getPrepay_id()).toString());
+		orderMapper.updateshopid(Order);
 					
 		return json.toJSONString();
     }
@@ -1061,6 +1064,32 @@ public class WxPayController {
     	List<OrderGood> temp;
     	temp=orderMapper.queryGood(order);  
 		return temp;	
+    }
+    
+    
+    @RequestMapping("wxpay/cert")
+    public String cert(Order Order) throws Exception {	
+		OrderInfo order = new OrderInfo();
+		order.setMch_id(mch_id);
+		order.setNonce_str(RandomStringGenerator.getRandomStringByLength(32));
+	
+		//生成签名
+		String sign = Signature.getSign(order);
+		order.setSign(sign);
+		
+		logger.info("body===="+order.getBody());
+		
+		HttpResult result = httpAPIService.doPost("https://apitest.mch.weixin.qq.com/sandboxnew/pay/getsignkey", order);
+		
+		XStream xStream = new XStream();
+		xStream.alias("xml", OrderReturnInfo.class); 
+
+		OrderReturnInfo returnInfo = (OrderReturnInfo)xStream.fromXML(result.getBody());
+		JSONObject json = new JSONObject();
+		json.put("return_code", returnInfo.getReturn_code());
+		json.put("return_msg", returnInfo.getReturn_msg());
+					
+		return json.toJSONString();
     }
     
     

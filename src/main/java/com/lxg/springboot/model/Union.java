@@ -13,6 +13,12 @@ public class Union extends BasicObject {
 	private String openid;
 
 	private String unionid;
+	
+	private String unionto;
+	
+	private String uuid;
+	
+	private int state;
 
 	public String getOpenid() {
 		return openid;
@@ -28,6 +34,30 @@ public class Union extends BasicObject {
 
 	public void setUnionid(String unionid) {
 		this.unionid = unionid;
+	}
+
+	public int getState() {
+		return state;
+	}
+
+	public void setState(int state) {
+		this.state = state;
+	}
+
+	public String getUnionto() {
+		return unionto;
+	}
+
+	public void setUnionto(String unionto) {
+		this.unionto = unionto;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 
 }

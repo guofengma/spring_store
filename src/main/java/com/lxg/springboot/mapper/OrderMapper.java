@@ -19,6 +19,8 @@ public interface OrderMapper {
 	
 	int updateshop(Order order);
 	
+	int updateshopid(Order order);
+	
 	int updatecard(Order order);
 	
 	int updatescore(Order order);

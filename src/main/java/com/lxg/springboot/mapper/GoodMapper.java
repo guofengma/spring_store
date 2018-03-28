@@ -9,6 +9,8 @@ public interface GoodMapper {
 		
 	List<Good> queryall(Good good);
 	
+	List<Good> queryname(Good good);
+	
 	Good query(Good good);
 	
 	Good querybyCode(Good good);

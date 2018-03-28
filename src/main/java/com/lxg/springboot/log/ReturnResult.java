@@ -73,6 +73,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletInputStream;
@@ -354,7 +355,7 @@ public class ReturnResult {
     }
     
     @RequestMapping("wxpay/shopresult")
-    public void shopresult(HttpServletRequest request,HttpServletResponse response) throws IOException { 
+    public void shopresult(HttpServletRequest request,HttpServletResponse response) throws Exception { 
     	logger.info("shopresult进入回调函数");
         InputStream inStream = request.getInputStream();
         ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
@@ -448,12 +449,56 @@ public class ReturnResult {
     			OrderPay.setState(1);		
             }
             else{
-            	OrderPay.setState(0);	
+            	logger.info("shopresult通知结果：" + "提现失败");
+            	OrderPay.setState(0);
+            	// 获取token
+        		String urltoken = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&" + "appid=" + appid
+        				+ "&" + "secret=" + appSecret;
+
+        		Token token = JSON.parseObject(httpAPIService.doGet(urltoken), Token.class);
+
+        		logger.info("shopresult通知结果：" + "token获取成功");
+        		
+        		String url = "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send?access_token="
+        				+ token.getAccess_token();
+
+        		// 参数
+        		
+        		TreeMap<String,TreeMap<String,String>> params = new TreeMap<String,TreeMap<String,String>>();  
+                //根据具体模板参数组装  
+                params.put("keyword1",item("服务接单 ","#000000"));  
+                params.put("keyword2",item(tempOrder.getTime(), "#333333"));  
+                params.put("keyword3",item("系统打款中", "#333333"));  
+               
+        	
+        		HashMap<String, Object> map1 = new HashMap<String, Object>();
+        		map1.put("touser", openid);
+        		map1.put("template_id", "y3szvUfb0ovtDQzMu87zIrFxtrt9l4LBpSmZYzFg-HM");
+        		map1.put("form_id", tempOrder.getBonusScore());
+        		map1.put("data", params);
+///       		map1.put("emphasis_keyword", "keyword1.DATA");
+
+        		HashMap<String, Object> maptemp = new HashMap<String, Object>();
+        		maptemp.put("Jsondata", JSON.toJSONString(map1));
+
+        		// 请求头
+        		HashMap<String, Object> header = new HashMap<String, Object>();
+
+        		HttpResult res = httpAPIService.doPostJson(url, maptemp, header);
+        		
+        		logger.info("shopresult通知结果：" + res.toString());
             }               
     		withDrawMapper.update(OrderPay);  	
     		}
         }
     }
+    
+    public static TreeMap<String, String> item(String value, String color) {  
+        TreeMap<String, String> params = new TreeMap<String, String>();  
+        params.put("value", value);  
+        params.put("color", color);  
+        return params;  
+    }  
     
     @RequestMapping("wxpay/cardresult")
     public void cardresult(HttpServletRequest request,HttpServletResponse response) throws IOException { 

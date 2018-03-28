@@ -7,6 +7,10 @@
 		select * from goodonsale where storeid=#{storeid}
 	</select>
 	
+	<select id="queryname" resultType="com.lxg.springboot.model.Good" >
+		select * from goodonsale where storeid=#{storeid} and (name like CONCAT('%',#{name},'%'))
+	</select>
+	
 	<select id="query" parameterType="com.lxg.springboot.model.Good"  resultType="com.lxg.springboot.model.Good">
 		select * from goodonsale where code=#{code} and storeid=#{storeid};
 	</select>

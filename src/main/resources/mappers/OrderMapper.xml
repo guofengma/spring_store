@@ -29,6 +29,12 @@
 		 where orderNo=#{orderNo}
 	</update>
 	
+	<update id="updateshopid" parameterType="com.lxg.springboot.model.Order">
+		 update storeorders 
+		 set bonusScore=#{bonusScore}
+		 where orderNo=#{orderNo}
+	</update>
+	
 	<update id="updatecard" parameterType="com.lxg.springboot.model.Order">
 		 update cardorders 
 		 set state=#{state}

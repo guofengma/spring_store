@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class CollectionUtil {
 
@@ -68,5 +69,13 @@ public class CollectionUtil {
 
 		return result;
 	}
+	
+	public static String generateUUID() {  
+        String uuid = UUID.randomUUID().toString();  
+        uuid = uuid.replace("-", "");  
+        Long currentTime = System.currentTimeMillis();  
+        String currentDate = String.valueOf(currentTime);  
+        return uuid + currentDate;  
+    }  
 
 }

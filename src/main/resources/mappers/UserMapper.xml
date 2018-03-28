@@ -105,14 +105,35 @@
 		where phoneno=#{phoneno} 
 	</select>
 	
+	<select id="countbossp1" parameterType="com.lxg.springboot.model.User" resultType="int">
+		select count(*) from userboss 
+		where phoneno=#{phoneno} and (role='boss' or role='operator')
+	</select>
+	
 	<insert id="saveunion" parameterType="com.lxg.springboot.model.Union">
 		INSERT INTO unionopen (openid, unionid)
 		values (#{openid},#{unionid})
 	</insert>
 	
+	<insert id="saveunionstate" parameterType="com.lxg.springboot.model.Union">
+		INSERT INTO tansferflag (unionid,state,uuid)
+		values (#{unionid},#{state},#{uuid})
+	</insert>
+	
+	<insert id="updateunionstate" parameterType="com.lxg.springboot.model.Union">
+		update tansferflag
+		set state=#{state},unionto=#{unionto}
+		where uuid=#{uuid}
+	</insert>
+	
 	<select id="getunionid" parameterType="String" resultType="String">
 		select unionid from unionopen
 		where openid=#{openid} 
+	</select>
+	
+	<select id="getunionstate" parameterType="com.lxg.springboot.model.Union" resultType="int">
+		select count(*) from tansferflag
+		where uuid=#{uuid} and state=#{state}
 	</select>
 	
 	<insert id="savefinance" parameterType="com.lxg.springboot.model.Finance">
