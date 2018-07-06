@@ -85,12 +85,12 @@ public class ScoreController extends BaseController {
 	    }   
 	    
 	    @RequestMapping("query")
-	    public Msg query(String unionId) {
-	    	logger.info("企业支付结果：" + unionId);
+	    public Msg query(String openid) {
+	    	logger.info("企业支付结果：" + openid);
 			
 
 	    	String ccid = "";
-			String urla = "https://store.lianlianchains.com/kd/query?func=getBalance&" + "ccId=" + ccid + "&" + "usr=" + unionId	+ "&" + "acc=" + unionId;
+			String urla = "http://140.143.211.161/kd/query?func=getBalance&" + "ccId=" + ccid + "&" + "usr=" + openid	+ "&" + "acc=" + openid;
 			
 			String res = null;
 			
@@ -114,11 +114,11 @@ public class ScoreController extends BaseController {
 	    }  
 	    
 	    @RequestMapping("querydetail")
-	    public Msg querydetail(String unionId ,int start ,int pagenum) {
+	    public Msg querydetail(String openid ,int start ,int pagenum) {
 	    	
 
 	    	String ccid = "";
-			String urla = "https://store.lianlianchains.com/kd/query?func=getTransInfo&" + "ccId=" + ccid + "&" + "usr=" + unionId	+ "&" + "acc=" + unionId + "&" + "qacc=" + unionId	+ "&" + "bsq=" + start + "&" + "cnt=" + pagenum;
+			String urla = "http://140.143.211.161/kd/query?func=getTransInfo&" + "ccId=" + ccid + "&" + "usr=" + openid	+ "&" + "acc=" + openid + "&" + "qacc=" + openid	+ "&" + "bsq=" + start + "&" + "cnt=" + pagenum;
 			
 			String res = null;
 			

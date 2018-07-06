@@ -184,11 +184,11 @@ public class WxPayController {
 		json.put("return_msg", returnInfo.getReturn_msg());
 		json.put("orderNo", orderNo);
 		
-		String userunion = userMapper.getunionid(Order.getOpenid());
+		String userunion = Order.getOpenid();
 		User tempuser = new User();
 		tempuser.setStoreid(Order.getStoreid());
 		User Boss=userMapper.querybossbyid(tempuser);
-		String bossunion = userMapper.getunionid(Boss.getOpenid());
+		String bossunion = Boss.getOpenid();
 		String ccid = "";
 		String urla ="";
 		String res="";
@@ -631,7 +631,7 @@ public class WxPayController {
     		long now =  System.currentTimeMillis();  
     		String ms = now + "";
     		String ccid = "";
-    		String url = "https://store.lianlianchains.com/kd/invoke?func=allocEarning&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + shop.get(i).getStoreId()
+    		String url = "http://140.143.211.161/kd/invoke?func=allocEarning&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + shop.get(i).getStoreId()
     				+ "&" + "slr=" + shop.get(i).getDeal() + "&"  + "pfm=" + shop.get(i).getDeal() + "&"  + "fld=" + shop.get(i).getField() + "&" + "dvy=" + shop.get(i).getSupply()
     				+ "&" + "tamt=" + Integer.toString(fee) + "&ak=" + ms ;
 
@@ -645,7 +645,7 @@ public class WxPayController {
     		JSONObject json = JSON.parseObject(res);  
     		String resc = json.getString("code");
     		if (resc.equals("0")){
-    			url = "https://store.lianlianchains.com/kd/query?func=queryRackAlloc&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + shop.get(i).getStoreId()
+    			url = "http://140.143.211.161/kd/query?func=queryRackAlloc&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + shop.get(i).getStoreId()
         			 + "&ak=" + ms ;
     		try {
 				res = httpAPIService.doGet(url);

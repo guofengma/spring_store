@@ -61,8 +61,10 @@ public class HttpAPIService {
         // 判断状态码是否为200
         if (response.getStatusLine().getStatusCode() == 200) {
             // 返回响应体的内容
+        	httpGet.releaseConnection();
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         }
+        httpGet.releaseConnection();
         return null;
     }
 
@@ -117,6 +119,7 @@ public class HttpAPIService {
 
         // 发起请求
         CloseableHttpResponse response = this.httpClient.execute(httpPost);
+        httpPost.releaseConnection();
         return new HttpResult(response.getStatusLine().getStatusCode(), EntityUtils.toString(
                 response.getEntity(), "UTF-8"));
     }

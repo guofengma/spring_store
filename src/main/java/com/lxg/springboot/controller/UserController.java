@@ -123,17 +123,17 @@ public class UserController extends BaseController {
     	
     	userMapper.savefinance(finance); 	
     	
-    	String userunion = userMapper.getunionid(finance.getOpenid());
+    	String userunion = finance.getOpenid();
     	User tempuser = new User();
 		tempuser.setStoreid(finance.getStoreid());
 		User Boss=userMapper.querybossbyid(tempuser);
-		String bossunion = userMapper.getunionid(Boss.getOpenid());
+		String bossunion = Boss.getOpenid();
 		
 		String ccid = "";
 		String urla ="";
 		String res="";
 		
-		urla = "https://store.lianlianchains.com/kd/invoke?func=buyFinance&ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&"+ "rid=" + finance.getStoreid()  + "&fid=" + time +"&pee=" + bossunion  +  "&" + "amt=" + finance.getScore()  + "&desc=积分定期投资";
+		urla = "http://140.143.211.161/kd/invoke?func=buyFinance&ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&"+ "rid=" + finance.getStoreid()  + "&fid=" + time +"&pee=" + bossunion  +  "&" + "amt=" + finance.getScore()  + "&desc=积分定期投资";
 		
 		res = null;
 		
@@ -144,7 +144,7 @@ public class UserController extends BaseController {
 			e.printStackTrace();
 		}
 		
-		/*urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&" + "reacc=" + bossunion  +  "&" + "amt=" + finance.getScore()+ "&tstp=积分理财投资&desc=积分理财投资" ;
+		/*urla = "http://140.143.211.161/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&" + "reacc=" + bossunion  +  "&" + "amt=" + finance.getScore()+ "&tstp=积分理财投资&desc=积分理财投资" ;
 		
 		res = null;
 		
@@ -160,13 +160,13 @@ public class UserController extends BaseController {
     }  
     
     @RequestMapping("querytransfer")
-    public Msg querytransfer(String unionto,String unionid,String score,String password) {
+    public Msg querytransfer(String opento,String openid,String score,String password) {
     		
 		String ccid = "";
 		String urla ="";
 		String res="";
 		
-		urla ="https://store.lianlianchains.com/kd/query?func=transPreCheck&" + "ccId=" + ccid + "&" + "usr=" + unionid	+ "&" + "acc=" + unionid + "&" + "reacc=" + unionto +  "&" + "amt=" + score + "&tstp=积分交换&desc=积分交换&pwd="+ password;
+		urla ="http://140.143.211.161/kd/query?func=transPreCheck&" + "ccId=" + ccid + "&" + "usr=" + openid	+ "&" + "acc=" + openid + "&" + "reacc=" + opento +  "&" + "amt=" + score + "&tstp=积分交换&desc=积分交换&pwd="+ password;
 		
 		res = null;
 		
@@ -189,10 +189,10 @@ public class UserController extends BaseController {
     
     
     @RequestMapping("newredpack")
-    public Msg newredpack(String unionid) {
+    public Msg newredpack(String openid) {
     	
     	Union temp = new Union();
-		temp.setUnionid(unionid);
+		temp.setUnionid(openid);
 		temp.setState(0);
 		
 		String uuid = CollectionUtil.generateUUID();
@@ -206,13 +206,13 @@ public class UserController extends BaseController {
     
     
     @RequestMapping("scoretransfer")
-    public Msg scoretransfer(String unionto,String unionid,String score,String password) {
+    public Msg scoretransfer(String opento,String openid,String score,String password) {
     		
 		String ccid = "";
 		String urla ="";
 		String res="";
 		
-		urla ="https://store.lianlianchains.com/kd/invoke?func=transeferUsePwd&" + "ccId=" + ccid + "&" + "usr=" + unionid	+ "&" + "acc=" + unionid + "&" + "reacc=" + unionto +  "&" + "amt=" + score + "&tstp=积分交换&desc=积分交换&pwd="+ password;
+		urla ="http://140.143.211.161/kd/invoke?func=transeferUsePwd&" + "ccId=" + ccid + "&" + "usr=" + openid	+ "&" + "acc=" + openid + "&" + "reacc=" + opento +  "&" + "amt=" + score + "&tstp=积分交换&desc=积分交换&pwd="+ password;
 		
 		res = null;
 		
@@ -234,13 +234,13 @@ public class UserController extends BaseController {
     } 
     
     @RequestMapping("transferquery")
-    public Msg transferquery(String unionto,String unionid,String amount) {
+    public Msg transferquery(String opento,String openid,String amount) {
     		
 		String ccid = "";
 		String urla ="";
 		String res="";
 		
-		urla ="https://store.lianlianchains.com/kd/query?func=transPreCheck&" + "ccId=" + ccid + "&" + "usr=" + unionid	+ "&" + "acc=" + unionid + "&" + "reacc=" + unionto +  "&" + "amt=" + amount + "&tstp=积分红包&desc=积分红包";
+		urla ="http://140.143.211.161/kd/query?func=transPreCheck&" + "ccId=" + ccid + "&" + "usr=" + openid	+ "&" + "acc=" + openid + "&" + "reacc=" + opento +  "&" + "amt=" + amount + "&tstp=积分红包&desc=积分红包";
 		
 		res = null;
 		
@@ -262,7 +262,7 @@ public class UserController extends BaseController {
     } 
     
     @RequestMapping("transfer")
-    public Msg transfer(String unionto,String unionid,String amount,String uuid) {
+    public Msg transfer(String opento,String openid,String amount,String uuid) {
     		
 		String ccid = "";
 		String urla ="";
@@ -270,14 +270,14 @@ public class UserController extends BaseController {
 		
 		Union temp = new Union();
 		temp.setUuid(uuid);
-		temp.setUnionid(unionid);
-		temp.setUnionto(unionto);
+		temp.setUnionid(openid);
+		temp.setUnionto(opento);
 		temp.setState(1);
 		
 		int flag = userMapper.getunionstate(temp);
 		
 		if (flag==0){
-		urla ="https://store.lianlianchains.com/kd/invoke?func=transefer&" + "usr=" + unionid	+ "&" + "acc=" + unionid + "&" + "reacc=" + unionto+ "&" + "amt="+ amount + "&tstp=积分红包&desc=积分红包";
+		urla ="http://140.143.211.161/kd/invoke?func=transefer&" + "usr=" + openid	+ "&" + "acc=" + openid + "&" + "reacc=" + opento+ "&" + "amt="+ amount + "&tstp=积分红包&desc=积分红包";
 		
 		res = null;
 		
@@ -303,22 +303,43 @@ public class UserController extends BaseController {
     	return ResultUtil.success(flag);
     } 
     
+    
+    @RequestMapping("redpackquery")
+    public Msg redpackquery(String uuid) {
+    			
+		Union temp = new Union();
+		temp.setUuid(uuid);
+		temp.setState(1);
+		
+		int flag = userMapper.getunionstate(temp);
+		
+		if (flag==0){
+			return ResultUtil.success(0);	
+		
+		}
+		else{
+			return ResultUtil.success(1);	
+		}
+    			
+    	
+    } 
+    
     @RequestMapping("deletefinance")
     public Msg deletefinance(Finance finance) {
     	
     	int i =userMapper.deletecount(finance);
     	if(i!=0){
-    	String userunion = userMapper.getunionid(finance.getOpenid());
+    	String userunion = finance.getOpenid();
     	User tempuser = new User();
 		tempuser.setStoreid(finance.getStoreid());
 		User Boss=userMapper.querybossbyid(tempuser);
-		String bossunion = userMapper.getunionid(Boss.getOpenid());
+		String bossunion = Boss.getOpenid();
 		
 		String ccid = "";
 		String urla ="";
 		String res="";
 		
-		urla = "https://store.lianlianchains.com/kd/invoke?func=payFinance&ccId=" + ccid + "&" + "usr=" + bossunion	+ "&" + "acc=" + bossunion + "&"+ "rid=" + finance.getStoreid() + "&pee=" + userunion  + "&desc=积分定期提取";
+		urla = "http://140.143.211.161/kd/invoke?func=payFinance&ccId=" + ccid + "&" + "usr=" + bossunion	+ "&" + "acc=" + bossunion + "&"+ "rid=" + finance.getStoreid() + "&pee=" + userunion  + "&desc=积分定期提取";
 		
 		res = null;
 		
@@ -338,7 +359,7 @@ public class UserController extends BaseController {
     	
 		userMapper.deletefinance(finance);
 		
-		/*urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + bossunion	+ "&" + "acc=" + bossunion + "&" + "reacc=" + userunion +  "&" + "amt=" + finance.getScore() + "&tstp=积分理财提取&desc=积分理财提取" ;
+		/*urla = "http://140.143.211.161/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + bossunion	+ "&" + "acc=" + bossunion + "&" + "reacc=" + userunion +  "&" + "amt=" + finance.getScore() + "&tstp=积分理财提取&desc=积分理财提取" ;
 		
 		res = null;
 		
@@ -357,13 +378,13 @@ public class UserController extends BaseController {
     public Msg resetPassword(String password,String openid) {
     	
 
-    	String userunion = userMapper.getunionid(openid);
+    	String userunion = openid;
 	
 		String ccid = "";
 		String urla ="";
 		String res="";
 		
-		urla = "https://store.lianlianchains.com/kd/invoke?func=resetAccPwd&ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&"+ "pwd=" + password ;
+		urla = "http://140.143.211.161/kd/invoke?func=resetAccPwd&ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&"+ "pwd=" + password ;
 		
 		res = null;
 		
@@ -427,7 +448,7 @@ public class UserController extends BaseController {
 		
 		if(!temp.equals("")){
 		String ccid = "";
-    	String urla = "https://store.lianlianchains.com/kd/invoke?func=financeBouns&ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&fid="+ fid + "&rscfg=" + temp;
+    	String urla = "http://140.143.211.161/kd/invoke?func=financeBouns&ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&fid="+ fid + "&rscfg=" + temp;
 		
 		String res = null;
 		
@@ -458,7 +479,7 @@ public class UserController extends BaseController {
         String time = format.format(new Date());     
 
 		String ccid = "";
-    	String urla = "https://store.lianlianchains.com/kd/invoke?func=financeIssueFinish&ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&fid="+ time;
+    	String urla = "http://140.143.211.161/kd/invoke?func=financeIssueFinish&ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&fid="+ time;
 		
 		String res = null;
 		
@@ -483,10 +504,10 @@ public class UserController extends BaseController {
     }
     
     @RequestMapping("queryalone")
-    public Msg queryalone(String unionId,String storeId) throws IOException { 
+    public Msg queryalone(String openid,String storeId) throws IOException { 
     
 		String ccid = "";
-    	String urla = "https://store.lianlianchains.com/kd/query?func=getRackFinanceProfit&ccId=" + ccid + "&" + "usr=" + unionId	+ "&" + "acc=" + unionId + "&"+ "rid=" + storeId;
+    	String urla = "http://140.143.211.161/kd/query?func=getRackFinanceProfit&ccId=" + ccid + "&" + "usr=" + openid	+ "&" + "acc=" + openid + "&"+ "rid=" + storeId;
 		
 		
 		String res = null;
@@ -517,7 +538,7 @@ public class UserController extends BaseController {
 
     
 		String ccid = "";
-    	String urla = "https://store.lianlianchains.com/kd/query?func=getRackRestFinanceCapacity&ccId=" + ccid + "&" + "&usr=centerBank&acc=centerBank&"+ "rid=" + storeId + "&fid="+ time;
+    	String urla = "http://140.143.211.161/kd/query?func=getRackRestFinanceCapacity&ccId=" + ccid + "&" + "&usr=centerBank&acc=centerBank&"+ "rid=" + storeId + "&fid="+ time;
 		
     	
 		String res = null;

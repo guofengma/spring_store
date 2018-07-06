@@ -133,7 +133,7 @@ public class ReturnResult {
 
 			Token token = JSON.parseObject(httpAPIService.doGet(urltoken), Token.class);
 
-			String url = "https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode?access_token="
+			String url = "https://api.weixin.qq.com/wxa/getwxacode?access_token="
 					+ token.getAccess_token();
 
 			// 参数
@@ -285,14 +285,14 @@ public class ReturnResult {
     			e.printStackTrace();
     		}	
     		
-    		String userunion = userMapper.getunionid(openid);
+    		String userunion = openid;
     		tempuser.setStoreid(Order.getStoreid());
-    		String bossunion = userMapper.getunionid(Boss.getOpenid());
+    		String bossunion = Boss.getOpenid();
     		String ccid = "";
     		String urla ="";
     		String res="";
     		
-    		urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + bossunion	+ "&" + "acc=" + bossunion + "&" + "reacc=" + userunion +  "&" + "amt=5" + "&tstp=消费奖励积分&desc=消费奖励积分" ;
+    		urla = "http://140.143.211.161/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + bossunion	+ "&" + "acc=" + bossunion + "&" + "reacc=" + userunion +  "&" + "amt=5" + "&tstp=消费奖励积分&desc=消费奖励积分" ;
     		
     		res = null;
     		
@@ -309,7 +309,7 @@ public class ReturnResult {
     		if(score > 0){
     			
     	    	
-    			urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&" + "reacc=" + bossunion +  "&" + "amt=" + score + "&tstp=消费抵扣积分&desc=消费抵扣积分" ;
+    			urla = "http://140.143.211.161/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=" + userunion	+ "&" + "acc=" + userunion + "&" + "reacc=" + bossunion +  "&" + "amt=" + score + "&tstp=消费抵扣积分&desc=消费抵扣积分" ;
     			
     			res = null;
     			
@@ -540,12 +540,12 @@ public class ReturnResult {
         orderMapper.updatecard(Order);    
         userMapper.updatecard(card);
         
-        String userunion = userMapper.getunionid(openid);
+        String userunion = openid;
 		String ccid = "";
 		String urla ="";
 		String res="";
 		int i = (int) (tempOrder.getFee()*10);
-		urla = "https://store.lianlianchains.com/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=kdcoinpool" + "&" + "acc=kdcoinpool"  + "&" + "reacc=" + userunion +  "&" + "amt=" + i + "&tstp=购卡奖励积分&desc=购卡奖励积分" ;
+		urla = "http://140.143.211.161/kd/invoke?func=transefer&" + "ccId=" + ccid + "&" + "usr=kdcoinpool" + "&" + "acc=kdcoinpool"  + "&" + "reacc=" + userunion +  "&" + "amt=" + i + "&tstp=购卡奖励积分&desc=购卡奖励积分" ;
 		
 		res = null;
 		

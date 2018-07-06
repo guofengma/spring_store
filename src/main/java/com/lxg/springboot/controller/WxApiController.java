@@ -106,7 +106,7 @@ public class WxApiController {
                 map.put("userInfo", userInfo);
                 String unionId = userInfoJSON.getString("unionId");
                 
-                String urla = "https://store.lianlianchains.com/kd/register?func=account&ccId=" + "&" + "usr=" + unionId + "&" + "acc=" + unionId;
+                String urla = "http://140.143.211.161/kd/register?func=account&ccId=" + "&" + "usr=" + unionId + "&" + "acc=" + unionId;
                 String resa = null;
                 try
                 {
@@ -157,7 +157,7 @@ public class WxApiController {
       return map;
     }
     
-	@RequestMapping("wx/account")
+/*	@RequestMapping("wx/account")
 	public Msg account(String openid,String unionId) throws Exception {
 		Union union = new Union();
         union.setOpenid(openid);
@@ -170,7 +170,7 @@ public class WxApiController {
         }            
 
         String ccid = "";
-        String urla = "https://store.lianlianchains.com/kd/query?func=isAccExists&ccId=" + ccid + "&" + "usr=" + unionId + "&" + "acc=" + unionId;
+        String urla = "http://140.143.211.161/kd/query?func=isAccExists&ccId=" + ccid + "&" + "usr=" + unionId + "&" + "acc=" + unionId;
         
         String resa = null;
         try
@@ -188,7 +188,49 @@ public class WxApiController {
           String flag = json.getString("result");
           if (!flag.equals("1"))
           {
-            urla = "https://store.lianlianchains.com/kd/register?func=account&ccId=" + ccid + "&" + "usr=" + unionId + "&" + "acc=" + unionId;
+            urla = "http://140.143.211.161/kd/register?func=account&ccId=" + ccid + "&" + "usr=" + unionId + "&" + "acc=" + unionId;
+            resa = null;
+            try
+            {
+              resa = this.httpAPIService.doGet(urla);
+            }
+            catch (Exception e)
+            {
+              e.printStackTrace();
+            }
+            json = JSON.parseObject(resa);
+            resc = json.getString("code");
+          }
+        }
+        
+		return ResultUtil.success();
+
+	}*/
+	
+    
+    @RequestMapping("wx/account")
+	public Msg account(String openid) throws Exception {          
+
+        String ccid = "";
+        String urla = "http://140.143.211.161/kd/query?func=isAccExists&ccId=" + ccid + "&" + "usr=" + openid + "&" + "acc=" + openid;
+        
+        String resa = null;
+        try
+        {
+          resa = this.httpAPIService.doGet(urla);
+        }
+        catch (Exception e)
+        {
+          e.printStackTrace();
+        }
+        com.alibaba.fastjson.JSONObject json = JSON.parseObject(resa);
+        String resc = json.getString("code");
+        if (resc.equals("0"))
+        {
+          String flag = json.getString("result");
+          if (!flag.equals("1"))
+          {
+            urla = "http://140.143.211.161/kd/register?func=account&ccId=" + ccid + "&" + "usr=" + openid + "&" + "acc=" + openid;
             resa = null;
             try
             {
@@ -206,8 +248,8 @@ public class WxApiController {
 		return ResultUtil.success();
 
 	}
-	
-	@RequestMapping("wx/getUnionID")
+    
+/*	@RequestMapping("wx/getUnionID")
 	public String getUnionID(String code,String token) throws Exception {
 
 		String url = "GET https://api.weixin.qq.com/cgi-bin/user/info?access_token=" + token + "&" + "openid=" + code
@@ -217,7 +259,7 @@ public class WxApiController {
 
 		return res;
 
-	}
+	}*/
 	
 	@RequestMapping("wx/getliteopenid")
 	public String getliteopenid(String code) throws Exception {

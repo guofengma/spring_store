@@ -682,7 +682,7 @@ public class ApplyController extends BaseController {
     	userMapper.saveboss(user);
     	
     	String ccid = "";
-		String urla = "https://store.lianlianchains.com/kd/invoke?func=setAllocCfg&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + id
+		String urla = "http://140.143.211.161/kd/invoke?func=setAllocCfg&" + "ccId=" + ccid + "&" + "usr=centerBank&acc=centerBank&rid=" + id
 				+ "&" + "slr=" + apply.getDealper() + "&"  + "pfm=" + apply.getPlatper() + "&"  + "fld=" + apply.getFieldper() + "&" + "dvy=" + apply.getSupplyper();
 		
 		String res = null;
@@ -701,12 +701,12 @@ public class ApplyController extends BaseController {
 			return ResultUtil.fail("区块链连接错误");
 		}		
 		
-		String fieldunion = userMapper.getunionid(shop.getField());		
-		String dealunion = userMapper.getunionid(shop.getDeal());		
-		String supplyunion = userMapper.getunionid(shop.getSupply());		
-		String platform = "o57KOvxS0eXTtxv23EobCON__S40";
+		String fieldunion = shop.getField();		
+		String dealunion =shop.getDeal();		
+		String supplyunion = shop.getSupply();		
+		String platform = "oyNAN0Yf3wEidxwR4jkcAlsqHaU8";
 		
-		urla = "https://store.lianlianchains.com/kd/invoke?func=encourageScoreForNewRack&" + "ccId=" + ccid + "&" + "usr=kdcoinpool&acc=kdcoinpool&desc=新货架奖励积分&cfg=" + shop.getStoreId()+ ","+dealunion+ ","+fieldunion+ ","+supplyunion+ ","+platform;
+		urla = "http://140.143.211.161/kd/invoke?func=encourageScoreForNewRack&" + "ccId=" + ccid + "&" + "usr=kdcoinpool&acc=kdcoinpool&desc=新货架奖励积分&cfg=" + shop.getStoreId()+ ","+dealunion+ ","+fieldunion+ ","+supplyunion+ ","+platform;
 		
 		res = null;
 		
@@ -821,9 +821,9 @@ public class ApplyController extends BaseController {
     		if(!temp.equals("")){
     			temp = temp + ";";
     		}
-    		fieldunion = userMapper.getunionid(shop.get(i).getField());		
-    		dealunion = userMapper.getunionid(shop.get(i).getDeal());		
-    		supplyunion = userMapper.getunionid(shop.get(i).getSupply());		
+    		fieldunion = shop.get(i).getField();		
+    		dealunion = shop.get(i).getDeal();		
+    		supplyunion = shop.get(i).getSupply();		
     		
     		Calendar c = Calendar.getInstance();
         	DateFormat format=new SimpleDateFormat("yyyyMMdd"); 
@@ -844,7 +844,7 @@ public class ApplyController extends BaseController {
         	temp = temp + shop.get(i).getStoreId()+","+ fee + "," +dealunion+ ","+fieldunion+ ","+supplyunion+ ","+platform;
     		}
         	String ccid = "";
-        	String urla = "https://store.lianlianchains.com/kd/invoke?func=encourageScoreForSales&" + "ccId=" + ccid + "&" + "usr=kdcoinpool&acc=kdcoinpool&desc=月度奖励积分&cfg="+ temp;
+        	String urla = "http://140.143.211.161/kd/invoke?func=encourageScoreForSales&" + "ccId=" + ccid + "&" + "usr=kdcoinpool&acc=kdcoinpool&desc=月度奖励积分&cfg="+ temp;
     		
     		String res = null;
     		
